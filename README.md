@@ -25,11 +25,12 @@ This project was inspired by the structure and scheduling principles of FreeRTOS
 
 ---
 
-## 🔨 How to Build
+## 安装必备工具
 
 ```bash
-# OLED模块代码来自江科大开源项目，已做适配
-make flash    # 烧录程序到 STM32 板子  
-make clean    # 清除所有编译生成的中间文件  
-
-
+sudo apt update
+sudo apt install gcc-arm-none-eabi
+sudo apt install gdb-multiarch
+sudo apt install openocd
+sudo apt install stlink-tools
+sudo apt install make
