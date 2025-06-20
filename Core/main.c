@@ -1,4 +1,4 @@
-#include "../Inc/stm32f10x.h"                  // Device header
+   
 #include "../Inc/OLED.h"
 #include "../Inc/task.h"
 TaskHandle_t T1,T2,T3;
