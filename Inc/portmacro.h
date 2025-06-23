@@ -1,31 +1,41 @@
 #ifndef PORTMACRO_H
 #define PORTMACRO_H
+typedef unsigned int UBaseType_t;
+typedef int BaseType_t;
+typedef unsigned int TickType_t;
+typedef void (*TaskFunction_t)(void*);
+typedef unsigned int StackType_t;
 
+#define pdFALSE			( ( BaseType_t ) 0 )
 #define configLIBRARY_LOWEST_INTERRUPT_PRIORITY         0x0f
 #define configKERNEL_INTERRUPT_PRIORITY         ( configLIBRARY_LOWEST_INTERRUPT_PRIORITY << (8 - configPRIO_BITS) )
-#define portNVIC_INT_CTRL_REG		( * ( ( volatile uint32_t * ) 0xe000ed04 ) )
-
+#define configMAX_SYSCALL_INTERRUPT_PRIORITY    ( configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY << (8 - configPRIO_BITS) )
+#define portNVIC_INT_CTRL_REG		( * ( ( volatile unsigned int * ) 0xe000ed04 ) )
 #define portNVIC_PENDSVSET_BIT		( 1UL << 28UL )
+#define configPRIO_BITS             4
+#define configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY    0x01 
 
 void vPortEnterCritical( void );
 void vPortExitCritical( void );
+#define portSET_INTERRUPT_MASK_FROM_ISR()		ulPortRaiseBASEPRI()
+#define portCLEAR_INTERRUPT_MASK_FROM_ISR(x)	vPortSetBASEPRI(x)
 #define portDISABLE_INTERRUPTS()				vPortRaiseBASEPRI()
 #define portENABLE_INTERRUPTS()					vPortSetBASEPRI(0)
 #define portENTER_CRITICAL()					vPortEnterCritical()
 #define portEXIT_CRITICAL()						vPortExitCritical()
-#ifndef portFORCE_INLINE
-	#define portFORCE_INLINE inline __attribute__(( always_inline))
-#endif
-#define configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY    0x01 
-#define configMAX_SYSCALL_INTERRUPT_PRIORITY    ( configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY << (8 - configPRIO_BITS) )
-#ifdef __NVIC_PRIO_BITS
-    #define configPRIO_BITS             __NVIC_PRIO_BITS
-#else
-    #define configPRIO_BITS             4
-#endif
-portFORCE_INLINE static void vPortRaiseBASEPRI( void )
+
+
+
+
+#define vPortSVCHandler     SVC_Handler
+#define xPortPendSVHandler  PendSV_Handler
+#define xPortSysTickHandler SysTick_Handler
+
+
+
+inline __attribute__(( always_inline)) static void vPortRaiseBASEPRI( void )
 {
-uint32_t ulNewBASEPRI;
+	unsigned int ulNewBASEPRI;
 
 	__asm volatile
 	(
@@ -36,16 +46,35 @@ uint32_t ulNewBASEPRI;
 		:"=r" (ulNewBASEPRI) : "i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY )
 	);
 }
-portFORCE_INLINE static void vPortSetBASEPRI( uint32_t ulNewMaskValue )
+inline __attribute__(( always_inline)) static void vPortSetBASEPRI( unsigned int ulNewMaskValue )
 {
 	__asm volatile
 	(
 		"	msr basepri, %0	" :: "r" ( ulNewMaskValue )
 	);
 }
-typedef void (*TaskFunction_t)(void*);
-typedef unsigned int StackType_t;
-typedef int BaseType_t;
+inline __attribute__(( always_inline)) static unsigned int ulPortRaiseBASEPRI( void )
+{
+	unsigned int ulOriginalBASEPRI, ulNewBASEPRI;
+
+	__asm volatile
+	(
+		"	mrs %0, basepri											\n" \
+		"	mov %1, %2												\n"	\
+		"	msr basepri, %1											\n" \
+		"	isb														\n" \
+		"	dsb														\n" \
+		:"=r" (ulOriginalBASEPRI), "=r" (ulNewBASEPRI) : "i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY )
+	);
+	return ulOriginalBASEPRI;
+}
+#define portYIELD() 															\
+{																				\
+	portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT;								\
+	__asm volatile( "dsb" );													\
+	__asm volatile( "isb" );													\
+}																				\
+
 
 BaseType_t xPortStartScheduler( void );
 StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters );

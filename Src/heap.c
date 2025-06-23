@@ -1,60 +1,115 @@
 #include "../Inc/heap.h"
-
-
 static BlockLink_t xStart, *pxEnd = NULL;
-static const size_t xHeapStructSize	= ( sizeof( BlockLink_t ) + ( ( size_t ) ( portBYTE_ALIGNMENT - 1 ) ) ) & ~( ( size_t ) portBYTE_ALIGNMENT_MASK );
-static size_t xFreeBytesRemaining = 0U;
-static size_t xMinimumEverFreeBytesRemaining = 0U;
-static size_t xBlockAllocatedBit = 0;
-static uint8_t ucHeap[ 10*1024 ];
+static const unsigned int xHeapStructSize	= ( sizeof( BlockLink_t ) + ( ( unsigned int ) ( portBYTE_ALIGNMENT - 1 ) ) ) & ~( ( unsigned int ) portBYTE_ALIGNMENT_MASK );
+static unsigned int xFreeBytesRemaining = 0U;
+static unsigned int xMinimumEverFreeBytesRemaining = 0U;
+static unsigned int xBlockAllocatedBit = 0;
+static unsigned char ucHeap[ 10*1024 ];
+void *memset(void *dstpp, int c, unsigned int len)
+{
+    unsigned int dstp = (unsigned int)dstpp;
+    if (len >= 4)
+    {
+        unsigned int xlen;
+        unsigned int cccc;
+        cccc = (unsigned char)c;
+        cccc |= cccc << 8;
+        cccc |= cccc << 16;
+        xlen = len / 32;
+        while (xlen-- > 0)
+        {
+            ((unsigned int *)dstp)[0] = cccc;
+            ((unsigned int *)dstp)[1] = cccc;
+            ((unsigned int *)dstp)[2] = cccc;
+            ((unsigned int *)dstp)[3] = cccc;
+            ((unsigned int *)dstp)[4] = cccc;
+            ((unsigned int *)dstp)[5] = cccc;
+            ((unsigned int *)dstp)[6] = cccc;
+            ((unsigned int *)dstp)[7] = cccc;
+            dstp += 32;
+        }
+        xlen = (len % 32) / 4;
+        while (xlen-- > 0)
+        {
+            ((unsigned int *)dstp)[0] = cccc;
+            dstp += 4;
+        }
+    }
+    return dstpp;
+}
+void* memcpy(void* dstpp, const void* srcpp, unsigned int len)
+{
+    unsigned int dstp = (unsigned int)dstpp;
+    unsigned int srcp = (unsigned int)srcpp;
+
+    if (len >= 4)
+    {
+        unsigned int nwords = len / 4;
+        while (nwords--)
+        {
+            *(unsigned int*)dstp = *(unsigned int*)srcp;
+            dstp += 4;
+            srcp += 4;
+        }
+        len %= 4;
+    }
+    while (len--)
+    {
+        *(unsigned char*)dstp = *(unsigned char*)srcp;
+        dstp += 1;
+        srcp += 1;
+    }
+    return dstpp;
+}
+
 void prvHeadInit(void)
 {
     BlockLink_t *pxFirstFreeBlock;
-    uint8_t *pucAlignedHead;
-    size_t uxAddress;
-    size_t xTotalHeadSize=(size_t)10*1024;
-    uxAddress=(size_t)ucHeap;
+    unsigned char *pucAlignedHead;
+    unsigned int uxAddress;
+    unsigned int xTotalHeadSize=(unsigned int)10*1024;
+    uxAddress=(unsigned int)ucHeap;
     memset(ucHeap, 0, 10*1024);
     if((uxAddress & 0x007)!=0)
     {
         uxAddress+=(8-1);
-        uxAddress&=~((size_t)0x007);
-        xTotalHeadSize-=uxAddress-(size_t)ucHeap;
+        uxAddress&=~((unsigned int)0x007);
+        xTotalHeadSize-=uxAddress-(unsigned int)ucHeap;
     }
     
-    pucAlignedHead=(uint8_t*)uxAddress;
+    pucAlignedHead=(unsigned char*)uxAddress;
 
     xStart.pxNextFreeBlock=(void*)pucAlignedHead;// void*  or BlockLink_t
-    xStart.xBlockSize=(size_t)0;
+    xStart.xBlockSize=(unsigned int)0;
 
-    uxAddress=(size_t)pucAlignedHead+xTotalHeadSize;
+    uxAddress=(unsigned int)pucAlignedHead+xTotalHeadSize;
     uxAddress-=xHeapStructSize;
-    uxAddress &=~((size_t)portBYTE_ALIGNMENT_MASK);
+    uxAddress &=~((unsigned int)portBYTE_ALIGNMENT_MASK);
 
     pxEnd=(void*)uxAddress;
-    pxEnd->xBlockSize=(size_t)0;
+    pxEnd->xBlockSize=(unsigned int)0;
     pxEnd->pxNextFreeBlock=NULL;
 
     pxFirstFreeBlock=(void*)pucAlignedHead;
-    pxFirstFreeBlock->xBlockSize=uxAddress-(size_t)pxFirstFreeBlock;
+    pxFirstFreeBlock->xBlockSize=uxAddress-(unsigned int)pxFirstFreeBlock;
     pxFirstFreeBlock->pxNextFreeBlock=pxEnd;
 
     xMinimumEverFreeBytesRemaining = pxFirstFreeBlock->xBlockSize;
 	xFreeBytesRemaining = pxFirstFreeBlock->xBlockSize;
 
-    xBlockAllocatedBit=((size_t) 1)<< (sizeof(size_t)*heapBITS_PER_BYTE-1);
+    xBlockAllocatedBit=((unsigned int) 1)<< (sizeof(unsigned int)*heapBITS_PER_BYTE-1);
     
 }
 void prvInsertBlockIntoFreeList( BlockLink_t *pxBlockToInsert )
 {
     BlockLink_t* pxIterator;
-    uint8_t *puc;
+    unsigned char *puc;
     for(pxIterator=&xStart;pxIterator->pxNextFreeBlock<pxBlockToInsert;pxIterator=pxIterator->pxNextFreeBlock)
     {
 
     };
-    puc=(uint8_t*)pxIterator;
-    if(puc+pxIterator->xBlockSize==(uint8_t*)pxBlockToInsert)
+    puc=(unsigned char*)pxIterator;
+    if(puc+pxIterator->xBlockSize==(unsigned char*)pxBlockToInsert)
     {
         pxIterator->xBlockSize+=pxBlockToInsert->xBlockSize;
         pxBlockToInsert=pxIterator;
@@ -63,8 +118,8 @@ void prvInsertBlockIntoFreeList( BlockLink_t *pxBlockToInsert )
     {
         mtCOVERAGE_TEST_MARKER();
     }
-    puc=(uint8_t*)pxBlockToInsert;
-    if(puc+pxBlockToInsert->xBlockSize==(uint8_t*)pxIterator->pxNextFreeBlock)
+    puc=(unsigned char*)pxBlockToInsert;
+    if(puc+pxBlockToInsert->xBlockSize==(unsigned char*)pxIterator->pxNextFreeBlock)
     {
         if(pxIterator->pxNextFreeBlock!=pxEnd)
         {
@@ -85,7 +140,8 @@ void prvInsertBlockIntoFreeList( BlockLink_t *pxBlockToInsert )
         pxIterator->pxNextFreeBlock=pxBlockToInsert;
     }
 }
-void *pvPortMalloc(size_t xWantedSize)
+
+void *pvPortMalloc(unsigned int xWantedSize)
 {
     BlockLink_t *pxBlock,*pxPreviousBlock,*pxNewBlockLink;
     void* pvReturn=NULL;
@@ -130,12 +186,12 @@ void *pvPortMalloc(size_t xWantedSize)
                 }
                 if(pxBlock!=pxEnd)
                 {
-                    pvReturn=(void*)(((uint8_t*)pxPreviousBlock->pxNextFreeBlock) + xHeapStructSize);
+                    pvReturn=(void*)(((unsigned char*)pxPreviousBlock->pxNextFreeBlock) + xHeapStructSize);
                     pxPreviousBlock->pxNextFreeBlock=pxBlock->pxNextFreeBlock;
                     if((pxBlock->xBlockSize-xWantedSize)>heapMINIMUM_BLOCK_SIZE)
                     {
-                        pxNewBlockLink=(void*)(((uint8_t*)pxBlock)+xWantedSize);
-                        //configASSERT( ( ( ( size_t ) pxNewBlockLink ) & portBYTE_ALIGNMENT_MASK ) == 0 );
+                        pxNewBlockLink=(void*)(((unsigned char*)pxBlock)+xWantedSize);
+                        //configASSERT( ( ( ( unsigned int ) pxNewBlockLink ) & portBYTE_ALIGNMENT_MASK ) == 0 );
                         pxNewBlockLink->xBlockSize=pxBlock->xBlockSize-xWantedSize;
                         pxBlock->xBlockSize=xWantedSize;
                         prvInsertBlockIntoFreeList( pxNewBlockLink );
@@ -185,19 +241,16 @@ void *pvPortMalloc(size_t xWantedSize)
 		}
 	}
 	#endif
-    //configASSERT( ( ( ( size_t ) pvReturn ) & ( size_t ) portBYTE_ALIGNMENT_MASK ) == 0 );
     return pvReturn;
 }
 void vPortFree( void *pv )
 {
-    uint8_t *puc=(uint8_t*)pv;
+    unsigned char *puc=(unsigned char*)pv;
     BlockLink_t *pxLink;
     if(pv!=NULL)
     {
         puc -= xHeapStructSize;
         pxLink=(void* )puc;
-        //configASSERT( ( pxLink->xBlockSize & xBlockAllocatedBit ) != 0 );
-		//configASSERT( pxLink->pxNextFreeBlock == NULL );
         if((pxLink->xBlockSize & xBlockAllocatedBit)!=0)
         {
             if(pxLink->pxNextFreeBlock==NULL)
@@ -206,7 +259,6 @@ void vPortFree( void *pv )
                 vTaskSuspendAll();
                 {
                     xFreeBytesRemaining+=pxLink->xBlockSize;
-                    //traceFREE( pv, pxLink->xBlockSize );
                     prvInsertBlockIntoFreeList(((BlockLink_t*)pxLink));
                 }
             (void)xTaskResumeAll();

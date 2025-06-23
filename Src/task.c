@@ -1,11 +1,5 @@
 #include "../Inc/task.h"
-#include "../Inc/OLED.h"
-//int temp=0;
 
-
-
-#define tskSTACK_FILL_BYTE	( 0xa5U )
-#define taskNOT_WAITING_NOTIFICATION	( ( uint8_t ) 0 )
 static List_t * volatile pxDelayedTaskList;
 static List_t * volatile pxOverflowDelayedTaskList;
 static List_t xDelayedTaskList1;
@@ -22,45 +16,11 @@ static volatile BaseType_t xNumOfOverflows 			= ( BaseType_t ) 0;
 static volatile BaseType_t xSchedulerRunning 		= pdFALSE;
 static volatile BaseType_t xYieldPending 			= pdFALSE;
 static UBaseType_t uxTaskNumber 					= ( UBaseType_t ) 0U;
-
 static volatile UBaseType_t uxDeletedTasksWaitingCleanUp = ( UBaseType_t ) 0U;
-
 static List_t xTasksWaitingTermination;
 static List_t xSuspendedTaskList;
 TCB_t * volatile pxCurrentTCB = NULL;
-
-static TaskHandle_t xIdleTaskHandle					= NULL;
-
-
-
-#define portRECORD_READY_PRIORITY( uxPriority, uxReadyPriorities ) ( uxReadyPriorities ) |= ( 1UL << ( uxPriority ) )
-#define taskRECORD_READY_PRIORITY( uxPriority )	portRECORD_READY_PRIORITY( uxPriority, uxTopReadyPriority )
-#define prvAddTaskToReadyList( pxTCB )																   \
-	taskRECORD_READY_PRIORITY( ( pxTCB )->uxPriority );												   \
-	vListInsertEnd( &( pxReadyTasksLists[ ( pxTCB )->uxPriority ] ), &( ( pxTCB )->xStateListItem ) ); \
-
-
-
-
-#define portNVIC_INT_CTRL_REG		( * ( ( volatile uint32_t * ) 0xe000ed04 ) )
-#define portNVIC_PENDSVSET_BIT		( 1UL << 28UL )
-
-#define portYIELD() 															\
-{																				\
-	/* Set a PendSV to request a context switch. */								\
-	portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT;								\
-																				\
-	/* Barriers are normally not required but do ensure the code is completely	\
-	within the specified behaviour for the architecture. */						\
-	__asm volatile( "dsb" );													\
-	__asm volatile( "isb" );													\
-}
-
-
-void Test1(void)
-{
-    portYIELD();
-}
+static TaskHandle_t xIdleTaskHandle	= NULL;
 
 static void prvInitialiseTaskLists( void )
 {
@@ -85,6 +45,13 @@ static void prvInitialiseTaskLists( void )
     pxDelayedTaskList = &xDelayedTaskList1;
     pxOverflowDelayedTaskList= &xDelayedTaskList2;
 }
+#define portRECORD_READY_PRIORITY( uxPriority, uxReadyPriorities ) ( uxReadyPriorities ) |= ( 1UL << ( uxPriority ) )
+#define taskRECORD_READY_PRIORITY( uxPriority )	portRECORD_READY_PRIORITY( uxPriority, uxTopReadyPriority )
+#define prvAddTaskToReadyList( pxTCB )																   \
+	taskRECORD_READY_PRIORITY( ( pxTCB )->uxPriority );												   \
+	vListInsertEnd( &( pxReadyTasksLists[ ( pxTCB )->uxPriority ] ), &( ( pxTCB )->xStateListItem ) ); \
+
+
 static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB )
 {
     taskENTER_CRITICAL();
@@ -128,7 +95,7 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB )
     {
         if(pxCurrentTCB->uxBasePriority<pxNewTCB->uxPriority)
         {
-            portYIELD();
+            taskYIELD();
         }
         else
         {
@@ -151,7 +118,7 @@ static void prvInitialiseNewTask( 	TaskFunction_t pxTaskCode,
 {
     StackType_t*pxTopOfStack;
     UBaseType_t x;
-    (void)memset(pxNewTCB->pxStack,(int)tskSTACK_FILL_BYTE,(size_t)ulStackDepth*( sizeof(StackType_t)));
+    (void)memset(pxNewTCB->pxStack,(int)tskSTACK_FILL_BYTE,(unsigned int)ulStackDepth*( sizeof(StackType_t)));
     pxTopOfStack=pxNewTCB->pxStack+(ulStackDepth-(uint32_t)1);
     pxTopOfStack=(StackType_t*)( (uint32_t)pxTopOfStack & (~0x7) );
     for(x=(UBaseType_t)0;x<(UBaseType_t)configMAX_TASK_NAME_LEN;x++)
@@ -214,7 +181,7 @@ BaseType_t xTaskCreate(  TaskFunction_t pxTaskCode,
     TCB_t* pxNewTCB=NULL;
     BaseType_t xreturn=-1;
     StackType_t* pxStack=NULL;
-    pxStack = ( StackType_t * ) pvPortMalloc( ( ( ( size_t ) usStackDepth ) * sizeof( StackType_t ) ) );
+    pxStack = ( StackType_t * ) pvPortMalloc( ( ( ( unsigned int ) usStackDepth ) * sizeof( StackType_t ) ) );
     if(pxStack!=NULL)
     {
         
@@ -285,8 +252,7 @@ BaseType_t xTaskIncrementTick( void )
         {
             taskSWITCH_DELAYED_LISTS();
         }
-        // OLED_ShowHexNum(1,8,xConstTickCount,8);
-        // OLED_ShowHexNum(2,8,xNextTaskUnblockTime,8);
+
         if(xConstTickCount>=xNextTaskUnblockTime)
         {
             for(;;)
@@ -438,7 +404,7 @@ BaseType_t xTaskResumeAll(void)
                         xAlreadyYielded =pdTRUE;
                     }
                     #endif
-                    portYIELD();
+                    taskYIELD();
                 }
             }
         }
@@ -488,12 +454,13 @@ static void prvCheckTasksWaitingTermination( void )
     #endif
 }
 
+
 static void prvIdleTask(void *pvParameters)
 {
     (void)pvParameters;
     for(;;)
     {
-        //OLED_ShowNum(1,1,temp++,4);
+        
         prvCheckTasksWaitingTermination();
         #if((configUSE_PREEMPTION==1) && ( configIDLE_SHOULD_YIELD == 1 ))
         {
@@ -622,7 +589,7 @@ void vTaskSuspend( TaskHandle_t xTaskToSuspend )
     {
         if(xSchedulerRunning!=pdFALSE)
         {
-            portYIELD();
+            taskYIELD();
         }
         else
         {
@@ -674,7 +641,7 @@ void vTaskDelete(TaskHandle_t xTaskToDelete )
     {
         if( pxTCB == pxCurrentTCB )
         {
-            portYIELD();
+            taskYIELD();
         }
     }
 }
@@ -688,7 +655,6 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait, const BaseT
    
     if( uxListRemove( &( pxCurrentTCB->xStateListItem ) ) == ( UBaseType_t ) 0 )
 	{
-        
 		portRESET_READY_PRIORITY( pxCurrentTCB->uxPriority, uxTopReadyPriority );
 	}
     if( ( xTicksToWait == portMAX_DELAY ) && ( xCanBlockIndefinitely != pdFALSE ) )
@@ -736,18 +702,577 @@ void vTaskDelay( const TickType_t xTicksToDelay )
     }
     if( xAlreadyYielded == pdFALSE )
     {
-        portYIELD();
+        taskYIELD();
     }
 }
-
 TickType_t xTaskGetTickCount( void )
 {
     TickType_t xTicks;
 	xTicks = xTickCount;
 	return xTicks;
 }
-void Test(void)
+void vTaskDelayUntil( TickType_t * const pxPreviousWakeTime, const TickType_t xTimeIncrement )
 {
-    
-    
+    TickType_t xTimeToWake;
+	BaseType_t xAlreadyYielded, xShouldDelay = pdFALSE;
+    vTaskSuspendAll();
+    {
+        const TickType_t xConstTickCount = xTickCount;
+        xTimeToWake = *pxPreviousWakeTime + xTimeIncrement;
+        if( xConstTickCount < *pxPreviousWakeTime )
+        {
+            if( ( xTimeToWake < *pxPreviousWakeTime ) && ( xTimeToWake > xConstTickCount ) )
+            {
+                xShouldDelay = pdTRUE;
+            }
+        }
+        else
+        {
+            if( ( xTimeToWake < *pxPreviousWakeTime ) || ( xTimeToWake > xConstTickCount ) )
+            {
+                xShouldDelay = pdTRUE;
+            }
+        }
+        *pxPreviousWakeTime = xTimeToWake;
+        if( xShouldDelay != pdFALSE )
+        {
+            prvAddCurrentTaskToDelayedList( xTimeToWake - xConstTickCount, pdFALSE );
+        }
+    }
+    xAlreadyYielded=xTaskResumeAll();
+    if( xAlreadyYielded == pdFALSE )
+    {
+        taskYIELD();
+    }
+
+}
+UBaseType_t uxTaskPriorityGet( TaskHandle_t xTask )
+{
+    TCB_t *pxTCB;
+    UBaseType_t uxReturn;
+    taskENTER_CRITICAL();
+    {
+        pxTCB = prvGetTCBFromHandle( xTask );
+        uxReturn = pxTCB->uxPriority;
+    }
+    taskEXIT_CRITICAL();
+
+    return uxReturn;
+}
+#define taskEVENT_LIST_ITEM_VALUE_IN_USE	0x80000000UL
+void vTaskPrioritySet( TaskHandle_t xTask, UBaseType_t uxNewPriority )
+{
+    TCB_t *pxTCB;
+	UBaseType_t uxCurrentBasePriority, uxPriorityUsedOnEntry;
+	BaseType_t xYieldRequired = pdFALSE;
+    if( uxNewPriority >= ( UBaseType_t ) configMAX_PRIORITIES )
+    {
+        uxNewPriority = ( UBaseType_t ) configMAX_PRIORITIES - ( UBaseType_t ) 1U;
+    }
+    taskENTER_CRITICAL();
+    {
+        pxTCB = prvGetTCBFromHandle( xTask );
+        uxCurrentBasePriority = pxTCB->uxBasePriority;
+
+        if( uxCurrentBasePriority != uxNewPriority )
+        {
+            if( uxNewPriority > uxCurrentBasePriority )
+            {
+                if( pxTCB != pxCurrentTCB )
+                {
+                    if( uxNewPriority >= pxCurrentTCB->uxPriority )
+                    {
+                        xYieldRequired = pdTRUE;
+                    }
+                }
+                else
+                {
+
+                }
+            }
+            else if( pxTCB == pxCurrentTCB )
+            {
+                xYieldRequired = pdTRUE;
+            }
+            else
+            {
+
+            }
+            uxPriorityUsedOnEntry = pxTCB->uxPriority;
+            if( pxTCB->uxBasePriority == pxTCB->uxPriority )
+            {
+                pxTCB->uxPriority = uxNewPriority;
+            }
+            pxTCB->uxBasePriority = uxNewPriority;
+            if( ( listGET_LIST_ITEM_VALUE( &( pxTCB->xEventListItem ) ) & taskEVENT_LIST_ITEM_VALUE_IN_USE ) == 0UL )
+            {
+                listSET_LIST_ITEM_VALUE( &( pxTCB->xEventListItem ), ( ( TickType_t ) configMAX_PRIORITIES - ( TickType_t ) uxNewPriority ) ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
+            }
+            if( listIS_CONTAINED_WITHIN( &( pxReadyTasksLists[ uxPriorityUsedOnEntry ] ), &( pxTCB->xStateListItem ) ) != pdFALSE )
+            {
+                if( uxListRemove( &( pxTCB->xStateListItem ) ) == ( UBaseType_t ) 0 )
+                {
+                    portRESET_READY_PRIORITY( uxPriorityUsedOnEntry, uxTopReadyPriority );
+                }
+                prvAddTaskToReadyList( pxTCB );
+            }
+            if( xYieldRequired != pdFALSE )
+            {
+                taskYIELD();
+            }
+            ( void ) uxPriorityUsedOnEntry;
+        }
+    }
+    taskEXIT_CRITICAL();
+}
+
+void vTaskPriorityInherit( TaskHandle_t const pxMutexHolder )
+{
+    TCB_t * const pxTCB = ( TCB_t * ) pxMutexHolder;
+    if( pxMutexHolder != NULL )
+    {
+        if( pxTCB->uxPriority < pxCurrentTCB->uxPriority )
+        {
+            if( ( listGET_LIST_ITEM_VALUE( &( pxTCB->xEventListItem ) ) & taskEVENT_LIST_ITEM_VALUE_IN_USE ) == 0UL )
+            {
+                listSET_LIST_ITEM_VALUE( &( pxTCB->xEventListItem ), ( TickType_t ) configMAX_PRIORITIES - ( TickType_t ) pxCurrentTCB->uxPriority ); 
+            }
+            if( listIS_CONTAINED_WITHIN( &( pxReadyTasksLists[ pxTCB->uxPriority ] ), &( pxTCB->xStateListItem ) ) != pdFALSE )
+            {
+                if( uxListRemove( &( pxTCB->xStateListItem ) ) == ( UBaseType_t ) 0 )
+                {
+                    taskRESET_READY_PRIORITY( pxTCB->uxPriority );
+                }
+                pxTCB->uxPriority = pxCurrentTCB->uxPriority;
+                prvAddTaskToReadyList( pxTCB );
+            }
+            else
+            {
+                pxTCB->uxPriority = pxCurrentTCB->uxPriority;
+            }
+        }
+    }
+}
+
+UBaseType_t uxTaskPriorityGetFromISR( TaskHandle_t xTask )
+{
+    TCB_t *pxTCB;
+    UBaseType_t uxReturn, uxSavedInterruptState;
+    uxSavedInterruptState = portSET_INTERRUPT_MASK_FROM_ISR();
+    {
+        pxTCB = prvGetTCBFromHandle( xTask );
+        uxReturn = pxTCB->uxPriority;
+    }
+    portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptState );
+    return uxReturn;
+}
+BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList ) 
+{
+    TCB_t *pxUnblockedTCB;
+    BaseType_t xReturn;
+    pxUnblockedTCB = ( TCB_t * ) listGET_OWNER_OF_HEAD_ENTRY( pxEventList );
+	
+	( void ) uxListRemove( &( pxUnblockedTCB->xEventListItem ) );
+    if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
+	{
+		( void ) uxListRemove( &( pxUnblockedTCB->xStateListItem ) );
+		prvAddTaskToReadyList( pxUnblockedTCB );
+	}
+    else
+    {
+        vListInsertEnd( &( xPendingReadyList ), &( pxUnblockedTCB->xEventListItem ) );
+    }
+    if(pxUnblockedTCB->uxPriority > pxCurrentTCB->uxPriority)
+    {
+        xReturn = pdTRUE;
+        xYieldPending = pdTRUE;
+    }
+    else
+    {
+        xReturn = pdFALSE;
+    }
+    return xReturn;
+}
+BaseType_t xTaskPriorityDisinherit( TaskHandle_t const pxMutexHolder )
+{
+    TCB_t * const pxTCB = ( TCB_t * ) pxMutexHolder;
+	BaseType_t xReturn = pdFALSE;
+    if( pxMutexHolder != NULL )
+    {
+        ( pxTCB->uxMutexesHeld )--;
+
+        if( pxTCB->uxPriority != pxTCB->uxBasePriority )
+        {
+            if( pxTCB->uxMutexesHeld == ( UBaseType_t ) 0 )
+            {
+                if( uxListRemove( &( pxTCB->xStateListItem ) ) == ( UBaseType_t ) 0 )
+                {
+                    taskRESET_READY_PRIORITY( pxTCB->uxPriority );
+                    
+                }
+                pxTCB->uxPriority = pxTCB->uxBasePriority;
+                listSET_LIST_ITEM_VALUE( &( pxTCB->xEventListItem ), ( TickType_t ) configMAX_PRIORITIES - ( TickType_t ) pxTCB->uxPriority ); 
+                prvAddTaskToReadyList( pxTCB );
+                xReturn = pdTRUE;
+            }
+        }
+    }
+    return xReturn;
+}
+void vTaskSetTimeOutState( TimeOut_t * const pxTimeOut )
+{
+	pxTimeOut->xOverflowCount = xNumOfOverflows;
+	pxTimeOut->xTimeOnEntering = xTickCount;
+}
+void vTaskMissedYield( void )
+{
+	xYieldPending = pdTRUE;
+}
+BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut, TickType_t * const pxTicksToWait )
+{
+    BaseType_t xReturn;
+    taskENTER_CRITICAL();
+    {
+        const TickType_t xConstTickCount = xTickCount;
+        if( *pxTicksToWait == portMAX_DELAY )
+        {
+            xReturn = pdFALSE;
+        }
+
+        if( ( xNumOfOverflows != pxTimeOut->xOverflowCount ) && ( xConstTickCount >= pxTimeOut->xTimeOnEntering ) ) 
+		{
+			xReturn = pdTRUE;
+		}
+        else if( ( ( TickType_t ) ( xConstTickCount - pxTimeOut->xTimeOnEntering ) ) < *pxTicksToWait )
+		{
+			
+			*pxTicksToWait -= ( xConstTickCount - pxTimeOut->xTimeOnEntering );
+			vTaskSetTimeOutState( pxTimeOut );
+			xReturn = pdFALSE;
+		}
+        else
+        {
+            return xReturn;
+        }
+    }
+    taskEXIT_CRITICAL();
+    return xReturn;
+}
+
+void vTaskPlaceOnEventList( List_t * const pxEventList, const TickType_t xTicksToWait )
+{
+	vListInsert( pxEventList, &( pxCurrentTCB->xEventListItem ) );
+	prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
+}
+void *pvTaskIncrementMutexHeldCount( void )
+{
+    if( pxCurrentTCB != NULL )
+    {
+        ( pxCurrentTCB->uxMutexesHeld )++;
+    }
+
+    return pxCurrentTCB;
+}
+TaskHandle_t xTaskGetCurrentTaskHandle( void )
+{
+    TaskHandle_t xReturn;
+
+    xReturn = pxCurrentTCB;
+
+    return xReturn;
+}
+
+BaseType_t xTaskGetSchedulerState( void )
+{
+    BaseType_t xReturn;
+    if( xSchedulerRunning == pdFALSE )
+    {
+        xReturn = taskSCHEDULER_NOT_STARTED;
+    }
+    else
+    {
+        if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
+        {
+            xReturn = taskSCHEDULER_RUNNING;
+        }
+        else
+        {
+            xReturn = taskSCHEDULER_SUSPENDED;
+        }
+    }
+    return xReturn;
+}
+void vTaskPlaceOnEventListRestricted( List_t * const pxEventList, TickType_t xTicksToWait, const BaseType_t xWaitIndefinitely )
+{
+    vListInsertEnd( pxEventList, &( pxCurrentTCB->xEventListItem ) );
+    if( xWaitIndefinitely != pdFALSE )
+    {
+        xTicksToWait = portMAX_DELAY;
+    }
+    prvAddCurrentTaskToDelayedList( xTicksToWait, xWaitIndefinitely );
+}
+
+BaseType_t xTaskGenericNotify( TaskHandle_t xTaskToNotify, UBaseType_t ulValue, eNotifyAction eAction, UBaseType_t *pulPreviousNotificationValue )
+{
+    TCB_t * pxTCB;
+	BaseType_t xReturn = pdTRUE;
+	uint8_t ucOriginalNotifyState;
+    pxTCB = ( TCB_t * ) xTaskToNotify;
+    taskENTER_CRITICAL();
+    {
+        if( pulPreviousNotificationValue != NULL )
+        {
+            *pulPreviousNotificationValue = pxTCB->ulNotifiedValue;
+        }
+
+        ucOriginalNotifyState = pxTCB->ucNotifyState;
+
+        pxTCB->ucNotifyState = taskNOTIFICATION_RECEIVED;
+        switch( eAction )
+        {
+            case eSetBits	:
+                pxTCB->ulNotifiedValue |= ulValue;
+                break;
+
+            case eIncrement	:
+                ( pxTCB->ulNotifiedValue )++;
+                break;
+
+            case eSetValueWithOverwrite	:
+                pxTCB->ulNotifiedValue = ulValue;
+                break;
+
+            case eSetValueWithoutOverwrite :
+                if( ucOriginalNotifyState != taskNOTIFICATION_RECEIVED )
+                {
+                    pxTCB->ulNotifiedValue = ulValue;
+                    xReturn = ucOriginalNotifyState;
+                }
+                else
+                {
+                    xReturn = pdFALSE;
+                }
+                break;
+
+            case eNoAction:
+                break;
+        }
+        if( ucOriginalNotifyState == taskWAITING_NOTIFICATION )
+        {
+            ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
+			prvAddTaskToReadyList( pxTCB );
+            if( pxTCB->uxPriority > pxCurrentTCB->uxPriority )
+            {
+                taskYIELD();
+            }
+        }
+    }
+    taskEXIT_CRITICAL();
+    return xReturn;
+}
+UBaseType_t ulTaskNotifyTake( BaseType_t xClearCountOnExit, TickType_t xTicksToWait )
+{
+    UBaseType_t ulReturn;
+    taskENTER_CRITICAL();
+    {
+        if( pxCurrentTCB->ulNotifiedValue == 0UL )
+        {
+            pxCurrentTCB->ucNotifyState = taskWAITING_NOTIFICATION;
+            if( xTicksToWait > ( TickType_t ) 0 )
+            {
+                prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
+                taskYIELD();
+            } 
+        }
+    }
+    taskEXIT_CRITICAL();
+    taskENTER_CRITICAL();
+    {
+        ulReturn = pxCurrentTCB->ulNotifiedValue;
+        if( ulReturn != 0UL )
+        {
+            if( xClearCountOnExit != pdFALSE )
+            {
+                pxCurrentTCB->ulNotifiedValue = 0UL;
+            }
+            else
+            {
+                pxCurrentTCB->ulNotifiedValue = ulReturn - 1;
+            }
+        }
+        pxCurrentTCB->ucNotifyState = taskNOT_WAITING_NOTIFICATION;
+    }
+    taskEXIT_CRITICAL();
+    return ulReturn;
+}
+
+void vTaskNotifyGiveFromISR( TaskHandle_t xTaskToNotify, BaseType_t *pxHigherPriorityTaskWoken )
+{
+    TCB_t * pxTCB;
+	uint8_t ucOriginalNotifyState;
+	UBaseType_t uxSavedInterruptStatus;
+    pxTCB = ( TCB_t * ) xTaskToNotify;
+
+	uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
+    {
+        ucOriginalNotifyState = pxTCB->ucNotifyState;
+		pxTCB->ucNotifyState = taskNOTIFICATION_RECEIVED;
+        ( pxTCB->ulNotifiedValue )++;
+        if( ucOriginalNotifyState == taskWAITING_NOTIFICATION )
+        {
+            if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
+            {
+                ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
+                prvAddTaskToReadyList( pxTCB );
+            }
+            else
+            {
+                vListInsertEnd( &( xPendingReadyList ), &( pxTCB->xEventListItem ) );
+            }
+
+            if( pxTCB->uxPriority > pxCurrentTCB->uxPriority )
+            {
+                if( pxHigherPriorityTaskWoken != NULL )
+                {
+                    *pxHigherPriorityTaskWoken = pdTRUE;
+                }
+                else
+                {
+                    xYieldPending = pdTRUE;
+                }
+            }
+        }
+    }
+    portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );
+}
+
+BaseType_t xTaskNotifyWait( uint32_t ulBitsToClearOnEntry, uint32_t ulBitsToClearOnExit, uint32_t *pulNotificationValue, TickType_t xTicksToWait )
+{
+    BaseType_t xReturn;
+    taskENTER_CRITICAL();
+    {
+        if( pxCurrentTCB->ucNotifyState != taskNOTIFICATION_RECEIVED )
+        {
+            pxCurrentTCB->ulNotifiedValue &= ~ulBitsToClearOnEntry;
+            pxCurrentTCB->ucNotifyState = taskWAITING_NOTIFICATION;
+            if( xTicksToWait > ( TickType_t ) 0 )
+            {
+                prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
+                taskYIELD();
+            }
+        }
+    }    
+    taskEXIT_CRITICAL();
+
+    taskENTER_CRITICAL();
+    {
+        if( pulNotificationValue != NULL )
+        {
+            *pulNotificationValue = pxCurrentTCB->ulNotifiedValue;
+        }
+        if( pxCurrentTCB->ucNotifyState == taskWAITING_NOTIFICATION )
+        {
+            xReturn = pdFALSE;
+        }
+        else
+        {
+            pxCurrentTCB->ulNotifiedValue &= ~ulBitsToClearOnExit;
+            xReturn = pdTRUE;
+        }
+        pxCurrentTCB->ucNotifyState = taskNOT_WAITING_NOTIFICATION;
+    }
+    taskEXIT_CRITICAL();
+    return xReturn;
+}
+BaseType_t xTaskGenericNotifyFromISR( TaskHandle_t xTaskToNotify, uint32_t ulValue, eNotifyAction eAction, uint32_t *pulPreviousNotificationValue, BaseType_t *pxHigherPriorityTaskWoken )
+{
+    TCB_t * pxTCB;
+	uint8_t ucOriginalNotifyState;
+	BaseType_t xReturn = 1;
+	UBaseType_t uxSavedInterruptStatus;
+    pxTCB = ( TCB_t * ) xTaskToNotify;
+    uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
+    {
+        if( pulPreviousNotificationValue != NULL )
+        {
+            *pulPreviousNotificationValue = pxTCB->ulNotifiedValue;
+        }
+        ucOriginalNotifyState = pxTCB->ucNotifyState;
+        pxTCB->ucNotifyState = taskNOTIFICATION_RECEIVED;
+        switch( eAction )
+        {
+            case eSetBits	:
+                pxTCB->ulNotifiedValue |= ulValue;
+                break;
+
+            case eIncrement	:
+                ( pxTCB->ulNotifiedValue )++;
+                break;
+
+            case eSetValueWithOverwrite	:
+                pxTCB->ulNotifiedValue = ulValue;
+                break;
+
+            case eSetValueWithoutOverwrite :
+                if( ucOriginalNotifyState != taskNOTIFICATION_RECEIVED )
+                {
+                    pxTCB->ulNotifiedValue = ulValue;
+                }
+                else
+                {
+                    xReturn = 0;
+                }
+                break;
+            case eNoAction :
+                break;
+        }
+        if( ucOriginalNotifyState == taskWAITING_NOTIFICATION )
+        {
+            if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
+            {
+                ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
+                prvAddTaskToReadyList( pxTCB );
+            }
+            else
+            {
+                vListInsertEnd( &( xPendingReadyList ), &( pxTCB->xEventListItem ) );
+            }
+            if( pxTCB->uxPriority > pxCurrentTCB->uxPriority )
+            {
+                if( pxHigherPriorityTaskWoken != NULL )
+                {
+                    *pxHigherPriorityTaskWoken = pdTRUE;
+                }
+                else
+                {
+                    xYieldPending = pdTRUE;
+                }
+            }
+        }
+    }
+    portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );
+    return xReturn;
+}
+
+BaseType_t xTaskGenericNotifyStateClear( TaskHandle_t xTask)
+{
+    TCB_t * pxTCB;
+    BaseType_t xReturn;
+
+    pxTCB = prvGetTCBFromHandle( xTask );
+
+    taskENTER_CRITICAL();
+    {
+        if( pxTCB->ucNotifyState == taskNOTIFICATION_RECEIVED )
+        {
+            pxTCB->ucNotifyState = taskNOT_WAITING_NOTIFICATION;
+            xReturn = 1;
+        }
+        else
+        {
+            xReturn = 0;
+        }
+    }
+    taskEXIT_CRITICAL();
+    return xReturn;
 }

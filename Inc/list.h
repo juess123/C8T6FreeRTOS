@@ -1,22 +1,18 @@
 #ifndef LIST_H
 #define LIST_H
-
-#include <stdio.h>
-
+#define NULL ((void *)0)
 #define portMAX_DELAY ( TickType_t ) 0xffffffffUL
-
 #define listLIST_IS_EMPTY( pxList )	( ( BaseType_t ) ( ( pxList )->uxNumberOfItems == ( UBaseType_t ) 0 ) )
 #define listSET_LIST_ITEM_OWNER( pxListItem, pxOwner )		( ( pxListItem )->pvOwner = ( void * ) ( pxOwner ) )
 #define listSET_LIST_ITEM_VALUE( pxListItem, xValue )	( ( pxListItem )->xItemValue = ( xValue ) )
 #define listCURRENT_LIST_LENGTH( pxList )	( ( pxList )->uxNumberOfItems )
-
-
 #define listGET_LIST_ITEM_VALUE( pxListItem )	( ( pxListItem )->xItemValue )
 #define listLIST_ITEM_CONTAINER( pxListItem ) ( ( pxListItem )->pvContainer )
-
-
-
+#define listIS_CONTAINED_WITHIN( pxList, pxListItem ) ( ( BaseType_t ) ( ( pxListItem )->pvContainer == ( void * ) ( pxList ) ) )
 #define listGET_OWNER_OF_HEAD_ENTRY( pxList )  ( (&( ( pxList )->xListRoot ))->pxNext->pvOwner )
+
+#define listGET_ITEM_VALUE_OF_HEAD_ENTRY( pxList )	( ( ( pxList )->xListRoot).pxNext->xItemValue )
+
 #define listGET_OWNER_OF_NEXT_ENTRY( pxTCB, pxList )                                       \
 {                                                                                          \
 	List_t * const pxConstList = ( pxList );                                               \
@@ -27,7 +23,6 @@
 	}                                                                                      \
 	( pxTCB ) = ( pxConstList )->pxIndex->pvOwner;                                         \
 }
-
 typedef unsigned int TickType_t;
 typedef unsigned int UBaseType_t;
 typedef struct xLIST_ITEM

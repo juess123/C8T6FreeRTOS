@@ -1,23 +1,86 @@
-inc =$(shell find Src -name *.c)
-core =$(shell find Core -name *.c)
-inc_obj =$(patsubst Src/%.c,Build/%.o,$(inc))
-core_obj =$(patsubst Core/%.c,Build/%.o,$(core))
-obj = Build/startup_stm32f10x_md.o $(inc_obj) $(core_obj)
+# 目标芯片架构
+MCU = cortex-m3
 
-Build/%.o :  Src/%.c
-	@arm-none-eabi-gcc -g -mthumb -mcpu=cortex-m3 -c $^ -o $@
-Build/%.o :  Core/%.c
-	@arm-none-eabi-gcc -g -mthumb -mcpu=cortex-m3 -c $^ -o $@
-Build/startup_stm32f10x_md.o : Config/startup_stm32f10x_md.s
-	@arm-none-eabi-gcc -g -mthumb -mcpu=cortex-m3 -c Config/startup_stm32f10x_md.s -o Build/startup_stm32f10x_md.o 
-Compile : $(obj)
-	@arm-none-eabi-gcc -g -O0 -o Build/exec.elf $^ -mthumb -mcpu=cortex-m3 -T Config/stm32_flash.ld -static -Wl,-cref,-u,Reset_Handler -Wl,-Map=Build/test.map -Wl,--gc-sections
-Bin : Compile
-	@arm-none-eabi-objcopy Build/exec.elf -O binary Build/exec.bin
-Run : Bin
-	@st-flash write ./Build/exec.bin 0x08000000 
-Clear :
-	rm -rf ./Build/*
+# 工具链配置
+CC = arm-none-eabi-gcc
+OBJCOPY = arm-none-eabi-objcopy
+OBJDUMP = arm-none-eabi-objdump
+SIZE = arm-none-eabi-size
+STFLASH = st-flash
+
+# 编译选项
+CFLAGS = -g -mthumb -mcpu=$(MCU) -fomit-frame-pointer -ffreestanding -nostdlib
+LDFLAGS = -T Config/stm32_flash.ld -static -Wl,-cref,-u,Reset_Handler -Wl,-Map=Build/output.map -Wl,--gc-sections
+
+# 源文件和对象文件
+SRC = $(wildcard Src/*.c) $(wildcard Core/*.c)
+OBJ = $(patsubst %.c, Build/%.o, $(notdir $(SRC)))
+OBJ := $(addprefix Build/, $(notdir $(OBJ)))
+
+# 启动文件对象
+STARTUP = Build/startup_stm32f10x_md.o
+
+# 最终目标文件
+TARGET = Build/exec.elf
+BIN = Build/exec.bin
+
+# 默认目标
+all: $(BIN)
+
+# 生成 .o 文件目录
+Build/%.o: Src/%.c
+	@mkdir -p Build
+	$(CC) $(CFLAGS) -c $< -o $@
+
+Build/%.o: Core/%.c
+	@mkdir -p Build
+	$(CC) $(CFLAGS) -c $< -o $@
+
+Build/startup_stm32f10x_md.o: Config/startup_stm32f10x_md.s
+	@mkdir -p Build
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# 链接
+$(TARGET): $(OBJ) $(STARTUP)
+	$(CC) $(CFLAGS) $(OBJ) $(STARTUP) $(LDFLAGS) -o $@
+	$(SIZE) $@
+
+# 生成 bin
+$(BIN): $(TARGET)
+	$(OBJCOPY) -O binary $< $@
+
+# 烧录到芯片
+flash: $(BIN)
+	$(STFLASH) write $(BIN) 0x8000000
+
+# 清理
+clean:
+	rm -rf Build/*
+
+.PHONY: all clean flash
+
+
+
+# inc =$(shell find Src -name *.c)
+# core =$(shell find Core -name *.c)
+# inc_obj =$(patsubst Src/%.c,Build/%.o,$(inc))
+# core_obj =$(patsubst Core/%.c,Build/%.o,$(core))
+# obj = Build/startup_stm32f10x_md.o $(inc_obj) $(core_obj)
+
+# Build/%.o :  Src/%.c
+# 	@arm-none-eabi-gcc -g -o2 -mthumb -fomit-frame-pointer -mcpu=cortex-m3 -c $^ -o $@
+# Build/%.o :  Core/%.c
+# 	@arm-none-eabi-gcc -g -o2 -mthumb -fomit-frame-pointer -mcpu=cortex-m3 -c $^ -o $@
+# Build/startup_stm32f10x_md.o : Config/startup_stm32f10x_md.s
+# 	@arm-none-eabi-gcc -g -o2 -mthumb -fomit-frame-pointer -mcpu=cortex-m3 -c Config/startup_stm32f10x_md.s -o Build/startup_stm32f10x_md.o 
+# Compile : $(obj)
+# 	@arm-none-eabi-gcc -g -o2 -o Build/exec.elf $^ -mthumb -fomit-frame-pointer -mcpu=cortex-m3 -T Config/stm32_flash.ld -static -Wl,-cref,-u,Reset_Handler -Wl,-Map=Build/test.map -Wl,--gc-sections
+# Bin : Compile
+# 	@arm-none-eabi-objcopy Build/exec.elf -O binary Build/exec.bin
+# Run : Bin
+# 	@st-flash write ./Build/exec.bin 0x08000000 
+# Clear :
+# 	rm -rf ./Build/*
 
 
 

@@ -4,14 +4,14 @@ UBaseType_t uxListRemove(ListItem_t* const pxItemToRemove)
     List_t* const pxList=(List_t*)pxItemToRemove->pvContainer;
     pxItemToRemove->pxNext->pxPrevious=pxItemToRemove->pxPrevious;
     pxItemToRemove->pxPrevious->pxNext=pxItemToRemove->pxNext;
-    //mtCOVERAGE_TEST_MARKER();
+    
     if(pxList->pxIndex==pxItemToRemove)
     {
         pxList->pxIndex=pxItemToRemove->pxPrevious;
     }
     else
     {
-        //mtCOVERAGE_TEST_MARKER();
+        
     }
     pxItemToRemove->pvContainer = NULL;
     (pxList->uxNumberOfItems)--;
@@ -23,7 +23,6 @@ void vListInsertEnd( List_t * const pxList, ListItem_t * const pxNewListItem )
 
     pxNewListItem->pxNext=pxIndex;
     pxNewListItem->pxPrevious=pxIndex->pxPrevious;
-    //mtCOVERAGE_TEST_DELAY();
     pxIndex->pxPrevious->pxNext=pxNewListItem;
     pxIndex->pxPrevious=pxNewListItem;
     pxNewListItem->pvContainer=(void*)pxList;
