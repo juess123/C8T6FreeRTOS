@@ -1,65 +1,54 @@
-#include "../Inc/stream_buffer.h"
 
+
+#include "../Inc/event_groups.h"
 #include "../Inc/OLED.h"
+#define BIT_0 (1 << 0)
 
-StreamBufferHandle_t xMessageBuffer;
+static EventGroupHandle_t xTestEventGroup = NULL;
 
-void vSenderTask(void *pvParameters)
+void vTaskA(void *pvParameters)
 {
-    const TickType_t xDelay = 100;
-    char* p="Stream buffers execute a callback upon completion of each send and receive operation Stream buffers created using the xStreamBufferCreate API share the same send and receive completed callback functions which are defined using ";
-    size_t sent,i=0;
-    while (1)
+    EventBits_t uxBits;
+    OLED_ShowChar(4,1,'o');
+    uxBits = xEventGroupWaitBits(
+        xTestEventGroup,  // 等待的事件组
+        BIT_0,            // 要等待的事件位
+        pdTRUE,           // 满足后清除事件位
+        pdTRUE,           // 等待所有位（这里只有 BIT_0）
+        5000 // 最多等 5 秒
+    );
+    if ((uxBits & BIT_0) != 0)
     {
-        if( i<200) 
-        {
-            sent = xStreamBufferSend(xMessageBuffer,p,12,100);
-            i+=12;
-            p+=12;
-        }
-        else
-        {
-            OLED_ShowNum(1,1,i,3);
-            vTaskSuspend(NULL);
-        }
-        if (sent > 0)
-        {
-            OLED_ShowNum(2,1,sent,4);
-        }
-        vTaskDelay(xDelay);
+       
+        OLED_ShowChar(1,1,'s');
+    }
+    else
+    {
+        OLED_ShowChar(2,1,'t');
+    }
+    while(1)
+    {
+        vTaskDelay(2000);
     }
 }
-void vReceiverTask(void *pvParameters)
-{
-    char recvBuffer[13] = {0};
 
-    while (1)
+// 任务 B：延迟一段时间后设置 BIT_0
+void vTaskB(void *pvParameters)
+{           
+    EventBits_t a;
+    a=xEventGroupSetBits(xTestEventGroup, BIT_0);
+    while(1)
     {
-        size_t received = xStreamBufferReceive(xMessageBuffer,recvBuffer,12,100);
-        if (received > 0)
-        {
-            OLED_ShowString(3,1,recvBuffer);   
-        }
-        vTaskDelay(200);
+        vTaskDelay(1000);
     }
 }
-void HardFault_Handler(void)
-{
-    OLED_ShowChar(4,1,'e');
-    for(;;);
-}
+
 int main(void)
 {
-
     OLED_Init();
-    xMessageBuffer=xStreamBufferGenericCreate(64, 4, sbFLAGS_IS_MESSAGE_BUFFER, NULL, NULL);
-    if (xMessageBuffer == NULL)
-    {
-        OLED_ShowNum(4,15,1,1);
-        while (1);
-    }
-    xTaskCreate(vSenderTask, "Sender", 512, NULL, 2, NULL);
-    xTaskCreate(vReceiverTask, "Receiver", 256, NULL, 1, NULL);
+    xTestEventGroup = xEventGroupCreate();
+    xTaskCreate(vTaskA, "TaskA", 256, NULL, 1, NULL);
+    xTaskCreate(vTaskB, "TaskB", 256, NULL, 2, NULL);
     vTaskStartScheduler();
     for (;;);
 }

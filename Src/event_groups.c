@@ -14,32 +14,21 @@ EventGroupHandle_t xEventGroupCreate( void )
 
 static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits, const EventBits_t uxBitsToWaitFor, const BaseType_t xWaitForAllBits )
 {
-BaseType_t xWaitConditionMet = pdFALSE;
+
+	BaseType_t xWaitConditionMet = pdFALSE;
 
 	if( xWaitForAllBits == pdFALSE )
 	{
-		/* Task only has to wait for one bit within uxBitsToWaitFor to be
-		set.  Is one already set? */
 		if( ( uxCurrentEventBits & uxBitsToWaitFor ) != ( EventBits_t ) 0 )
 		{
 			xWaitConditionMet = pdTRUE;
 		}
-		else
-		{
-			mtCOVERAGE_TEST_MARKER();
-		}
 	}
 	else
 	{
-		/* Task has to wait for all the bits in uxBitsToWaitFor to be set.
-		Are they set already? */
 		if( ( uxCurrentEventBits & uxBitsToWaitFor ) == uxBitsToWaitFor )
 		{
 			xWaitConditionMet = pdTRUE;
-		}
-		else
-		{
-			mtCOVERAGE_TEST_MARKER();
 		}
 	}
 
@@ -72,7 +61,7 @@ EventBits_t xEventGroupWaitBits( EventGroupHandle_t xEventGroup, const EventBits
         {
             if( xClearOnExit != pdFALSE )
 			{
-				uxControlBits |= eventCLEAR_EVENTS_ON_EXIT_BIT;
+				uxControlBits |= eventCLEAR_EVENTS_ON_EXIT_BIT; 
 			}
 			if( xWaitForAllBits != pdFALSE )
 			{
@@ -87,7 +76,7 @@ EventBits_t xEventGroupWaitBits( EventGroupHandle_t xEventGroup, const EventBits
     {
         if( xAlreadyYielded == pdFALSE )
 		{
-			portYIELD_WITHIN_API();
+			taskYIELD();
 		}
         uxReturn = uxTaskResetEventItemValue();
         if( ( uxReturn & eventUNBLOCKED_DUE_TO_BIT_SET ) == ( EventBits_t ) 0 )
@@ -101,7 +90,58 @@ EventBits_t xEventGroupWaitBits( EventGroupHandle_t xEventGroup, const EventBits
 				}
 			}
 			taskEXIT_CRITICAL();
+			xTimeoutOccurred = pdFALSE;
         }
+		uxReturn &= ~eventEVENT_BITS_CONTROL_BYTES;
     }
     return uxReturn;
+}
+
+EventBits_t xEventGroupSetBits( EventGroupHandle_t xEventGroup, const EventBits_t uxBitsToSet )
+{
+	ListItem_t *pxListItem, *pxNext;
+	ListItem_t const *pxListEnd;
+	List_t *pxList;
+	EventBits_t uxBitsToClear = 0, uxBitsWaitedFor, uxControlBits;
+	EventGroup_t *pxEventBits = ( EventGroup_t * ) xEventGroup;
+	BaseType_t xMatchFound = pdFALSE;
+	pxList = &( pxEventBits->xTasksWaitingForBits );
+	pxListEnd = listGET_END_MARKER( pxList );
+	vTaskSuspendAll();
+	{
+		pxListItem = listGET_HEAD_ENTRY( pxList );
+		pxEventBits->uxEventBits |= uxBitsToSet;
+		while( pxListItem != pxListEnd )
+		{
+			pxNext = listGET_NEXT( pxListItem );
+			uxBitsWaitedFor = listGET_LIST_ITEM_VALUE( pxListItem );
+			xMatchFound = pdFALSE;
+			uxControlBits = uxBitsWaitedFor & eventEVENT_BITS_CONTROL_BYTES;
+			uxBitsWaitedFor &= ~eventEVENT_BITS_CONTROL_BYTES;
+			if( ( uxControlBits & eventWAIT_FOR_ALL_BITS ) == ( EventBits_t ) 0 )
+			{
+				if( ( uxBitsWaitedFor & pxEventBits->uxEventBits ) != ( EventBits_t ) 0 )
+				{
+					xMatchFound = pdTRUE;
+				}
+			}
+			else if( ( uxBitsWaitedFor & pxEventBits->uxEventBits ) == uxBitsWaitedFor )
+			{
+				xMatchFound = pdTRUE;
+			}
+			if( xMatchFound != pdFALSE )
+			{
+				
+				if( ( uxControlBits & eventCLEAR_EVENTS_ON_EXIT_BIT ) != ( EventBits_t ) 0 )
+				{
+					uxBitsToClear |= uxBitsWaitedFor;
+				}
+				( void ) xTaskRemoveFromUnorderedEventList( pxListItem, pxEventBits->uxEventBits | eventUNBLOCKED_DUE_TO_BIT_SET );
+			}
+			pxListItem = pxNext;
+		}
+		pxEventBits->uxEventBits &= ~uxBitsToClear;
+	}
+	( void ) xTaskResumeAll();
+	return pxEventBits->uxEventBits;
 }

@@ -37,6 +37,7 @@ typedef void* TaskHandle_t;
 #define configMINIMAL_STACK_SIZE	( ( unsigned short ) 128 )
 #define tskSTACK_FILL_BYTE	( 0xa5U )
 
+#define taskEVENT_LIST_ITEM_VALUE_IN_USE	0x80000000UL
 
 #define taskNOT_WAITING_NOTIFICATION	( ( uint8_t ) 0 )
 #define taskWAITING_NOTIFICATION		( ( uint8_t ) 1 )
@@ -124,4 +125,8 @@ UBaseType_t ulTaskNotifyTake( BaseType_t xClearCountOnExit, TickType_t xTicksToW
 void vTaskNotifyGiveFromISR( TaskHandle_t xTaskToNotify, BaseType_t *pxHigherPriorityTaskWoken );
 BaseType_t xTaskNotifyWait( uint32_t ulBitsToClearOnEntry, uint32_t ulBitsToClearOnExit, uint32_t *pulNotificationValue, TickType_t xTicksToWait );
 BaseType_t xTaskGenericNotifyStateClear( TaskHandle_t xTask);
+
+void vTaskPlaceOnUnorderedEventList( List_t * pxEventList, const TickType_t xItemValue, const TickType_t xTicksToWait );
+TickType_t uxTaskResetEventItemValue( void );
+BaseType_t xTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem, const TickType_t xItemValue );
 #endif 

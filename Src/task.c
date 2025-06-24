@@ -19,7 +19,10 @@ static UBaseType_t uxTaskNumber 					= ( UBaseType_t ) 0U;
 static volatile UBaseType_t uxDeletedTasksWaitingCleanUp = ( UBaseType_t ) 0U;
 static List_t xTasksWaitingTermination;
 static List_t xSuspendedTaskList;
+
+
 TCB_t * volatile pxCurrentTCB = NULL;
+
 static TaskHandle_t xIdleTaskHandle	= NULL;
 
 static void prvInitialiseTaskLists( void )
@@ -1275,4 +1278,46 @@ BaseType_t xTaskGenericNotifyStateClear( TaskHandle_t xTask)
     }
     taskEXIT_CRITICAL();
     return xReturn;
+}
+void vTaskPlaceOnUnorderedEventList( List_t * pxEventList, const TickType_t xItemValue, const TickType_t xTicksToWait )
+{
+
+	listSET_LIST_ITEM_VALUE( &( pxCurrentTCB->xEventListItem ), xItemValue | taskEVENT_LIST_ITEM_VALUE_IN_USE );
+	vListInsertEnd( pxEventList, &( pxCurrentTCB->xEventListItem ) );
+	prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
+}
+TickType_t uxTaskResetEventItemValue( void )
+{
+    TickType_t uxReturn;
+
+	uxReturn = listGET_LIST_ITEM_VALUE( &( pxCurrentTCB->xEventListItem ) );
+	listSET_LIST_ITEM_VALUE( &( pxCurrentTCB->xEventListItem ), ( ( TickType_t ) configMAX_PRIORITIES - ( TickType_t ) pxCurrentTCB->uxPriority ) ); 
+
+	return uxReturn;
+}
+BaseType_t xTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem, const TickType_t xItemValue )
+{
+	TCB_t *pxUnblockedTCB;
+	BaseType_t xReturn;
+	listSET_LIST_ITEM_VALUE( pxEventListItem, xItemValue | taskEVENT_LIST_ITEM_VALUE_IN_USE );
+
+	pxUnblockedTCB = ( TCB_t * ) listGET_LIST_ITEM_OWNER( pxEventListItem );
+	( void ) uxListRemove( pxEventListItem );
+
+	
+	( void ) uxListRemove( &( pxUnblockedTCB->xStateListItem ) );
+	prvAddTaskToReadyList( pxUnblockedTCB );
+
+	if( pxUnblockedTCB->uxPriority > pxCurrentTCB->uxPriority )
+	{
+		xReturn = pdTRUE;
+
+		xYieldPending = pdTRUE;
+	}
+	else
+	{
+		xReturn = pdFALSE;
+	}
+
+	return xReturn;
 }

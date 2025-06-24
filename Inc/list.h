@@ -10,6 +10,10 @@
 #define listLIST_ITEM_CONTAINER( pxListItem ) ( ( pxListItem )->pvContainer )
 #define listIS_CONTAINED_WITHIN( pxList, pxListItem ) ( ( BaseType_t ) ( ( pxListItem )->pvContainer == ( void * ) ( pxList ) ) )
 #define listGET_OWNER_OF_HEAD_ENTRY( pxList )  ( (&( ( pxList )->xListRoot ))->pxNext->pvOwner )
+#define listGET_END_MARKER( pxList )	( ( ListItem_t const * ) ( &( ( pxList )->xListRoot ) ) )
+#define listGET_HEAD_ENTRY( pxList )	( ( ( pxList )->xListRoot ).pxNext )
+#define listGET_NEXT( pxListItem )	( ( pxListItem )->pxNext )
+#define listGET_LIST_ITEM_OWNER( pxListItem )	( ( pxListItem )->pvOwner )
 
 #define listGET_ITEM_VALUE_OF_HEAD_ENTRY( pxList )	( ( ( pxList )->xListRoot).pxNext->xItemValue )
 
