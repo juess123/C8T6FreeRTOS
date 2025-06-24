@@ -14,8 +14,19 @@ Discarded input sections
  .debug_frame   0x0000000000000000      0x200 Build/core_cm3.o
  .ARM.attributes
                 0x0000000000000000       0x2d Build/core_cm3.o
+ .text          0x0000000000000000      0x244 Build/event_groups.o
  .data          0x0000000000000000        0x0 Build/event_groups.o
  .bss           0x0000000000000000        0x0 Build/event_groups.o
+ .debug_info    0x0000000000000000      0x405 Build/event_groups.o
+ .debug_abbrev  0x0000000000000000       0xf3 Build/event_groups.o
+ .debug_aranges
+                0x0000000000000000       0x20 Build/event_groups.o
+ .debug_line    0x0000000000000000      0x1a2 Build/event_groups.o
+ .debug_str     0x0000000000000000      0x3a9 Build/event_groups.o
+ .comment       0x0000000000000000       0x34 Build/event_groups.o
+ .debug_frame   0x0000000000000000       0x7c Build/event_groups.o
+ .ARM.attributes
+                0x0000000000000000       0x2d Build/event_groups.o
  .data          0x0000000000000000        0x0 Build/heap.o
  .rodata        0x0000000000000000        0x4 Build/heap.o
  .data          0x0000000000000000        0x0 Build/list.o
@@ -82,6 +93,7 @@ Discarded input sections
  .ARM.attributes
                 0x0000000000000000       0x2d Build/timers.o
  .data          0x0000000000000000        0x0 Build/main.o
+ .bss           0x0000000000000000        0x0 Build/main.o
  .text          0x0000000000000000       0x14 Build/startup_stm32f10x_md.o
  .data          0x0000000000000000        0x0 Build/startup_stm32f10x_md.o
  .bss           0x0000000000000000        0x0 Build/startup_stm32f10x_md.o
@@ -122,247 +134,243 @@ LOAD Build/startup_stm32f10x_md.o
                 0x0000000008000000                g_pfnVectors
                 0x0000000000000001                ASSERT ((. != __isr_vector_start__), The .isr_vector section is empty)
 
-.rodata         0x000000000800010c      0x606
+.rodata         0x000000000800010c      0x603
  .rodata        0x000000000800010c      0x5f0 Build/OLED.o
                 0x000000000800010c                OLED_F8x16
  .rodata        0x00000000080006fc        0x5 Build/task.o
  *fill*         0x0000000008000701        0x3 
- .rodata        0x0000000008000704        0xe Build/main.o
+ .rodata        0x0000000008000704        0xb Build/main.o
 
-.text           0x0000000008000720     0x36e0
-                0x0000000008000720                . = ALIGN (0x4)
-                0x0000000008000720                _stext = .
+.text           0x0000000008000710     0x3520
+                0x0000000008000710                . = ALIGN (0x4)
+                0x0000000008000710                _stext = .
  *(.init)
  *(.fini)
-                0x0000000008000720                . = ALIGN (0x4)
-                0x0000000008000720                _etext = .
- .text          0x0000000008000720      0x244 Build/event_groups.o
-                0x0000000008000720                xEventGroupCreate
-                0x0000000008000786                xEventGroupWaitBits
-                0x000000000800088c                xEventGroupSetBits
- .text          0x0000000008000964      0x42c Build/heap.o
-                0x0000000008000964                memset
-                0x0000000008000a1e                memcpy
-                0x0000000008000a8a                prvHeadInit
-                0x0000000008000b54                prvInsertBlockIntoFreeList
-                0x0000000008000bfc                pvPortMalloc
-                0x0000000008000d20                vPortFree
- .text          0x0000000008000d90      0x136 Build/list.o
-                0x0000000008000d90                uxListRemove
-                0x0000000008000dda                vListInsertEnd
-                0x0000000008000e18                vListInsert
-                0x0000000008000e80                vListInitialiseItem
-                0x0000000008000e90                vListInitialise
- *fill*         0x0000000008000ec6        0x2 
- .text          0x0000000008000ec8      0x6fc Build/OLED.o
-                0x0000000008000ec8                OLED_I2C_Init
-                0x0000000008000f28                OLED_I2C_Start
-                0x0000000008000f64                OLED_I2C_Stop
-                0x0000000008000f94                OLED_I2C_SendByte
-                0x000000000800101c                OLED_WriteCommand
-                0x000000000800104c                OLED_WriteData
-                0x000000000800107c                OLED_SetCursor
-                0x00000000080010ca                OLED_Clear
-                0x000000000800111e                OLED_ShowChar
-                0x00000000080011f4                OLED_ShowString
-                0x0000000008001250                OLED_Pow
-                0x0000000008001278                OLED_ShowNum
-                0x0000000008001308                OLED_ShowSignedNum
-                0x00000000080013d0                OLED_ShowHexNum
-                0x000000000800147e                OLED_ShowBinNum
-                0x00000000080014fe                OLED_Init
- *fill*         0x00000000080015c4        0xc 
- .text          0x00000000080015d0      0x1fc Build/port.o
-                0x00000000080015e8                pxPortInitialiseStack
-                0x0000000008001638                vPortEnterCritical
-                0x0000000008001664                vPortExitCritical
-                0x0000000008001690                vPortSetupTimerInterrupt
-                0x00000000080016ca                xPortStartScheduler
-                0x0000000008001704                SysTick_Handler
-                0x0000000008001748                PendSV_Handler
-                0x0000000008001798                SVC_Handler
- .text          0x00000000080017cc      0x5b0 Build/stm32f10x_gpio.o
-                0x00000000080017cc                GPIO_DeInit
-                0x00000000080018b0                GPIO_AFIODeInit
-                0x00000000080018c6                GPIO_Init
-                0x0000000008001a36                GPIO_StructInit
-                0x0000000008001a54                GPIO_ReadInputDataBit
-                0x0000000008001a8a                GPIO_ReadInputData
-                0x0000000008001a9a                GPIO_ReadOutputDataBit
-                0x0000000008001ad0                GPIO_ReadOutputData
-                0x0000000008001ae0                GPIO_SetBits
-                0x0000000008001af8                GPIO_ResetBits
-                0x0000000008001b10                GPIO_WriteBit
-                0x0000000008001b40                GPIO_Write
-                0x0000000008001b58                GPIO_PinLockConfig
-                0x0000000008001b98                GPIO_EventOutputConfig
-                0x0000000008001be4                GPIO_EventOutputCmd
-                0x0000000008001c00                GPIO_PinRemapConfig
-                0x0000000008001cdc                GPIO_EXTILineConfig
-                0x0000000008001d68                GPIO_ETH_MediaInterfaceConfig
- .text          0x0000000008001d7c      0x74c Build/stm32f10x_rcc.o
-                0x0000000008001d7c                RCC_DeInit
-                0x0000000008001dd0                RCC_HSEConfig
-                0x0000000008001e24                RCC_WaitForHSEStartUp
-                0x0000000008001e80                RCC_AdjustHSICalibrationValue
-                0x0000000008001eb8                RCC_HSICmd
-                0x0000000008001ed4                RCC_PLLConfig
-                0x0000000008001f08                RCC_PLLCmd
-                0x0000000008001f24                RCC_SYSCLKConfig
-                0x0000000008001f54                RCC_GetSYSCLKSource
-                0x0000000008001f68                RCC_HCLKConfig
-                0x0000000008001f98                RCC_PCLK1Config
-                0x0000000008001fc8                RCC_PCLK2Config
-                0x0000000008001ff8                RCC_ITConfig
-                0x0000000008002044                RCC_USBCLKConfig
-                0x0000000008002058                RCC_ADCCLKConfig
-                0x0000000008002088                RCC_LSEConfig
-                0x00000000080020c4                RCC_LSICmd
-                0x00000000080020e0                RCC_RTCCLKConfig
-                0x00000000080020fc                RCC_RTCCLKCmd
-                0x0000000008002118                RCC_GetClocksFreq
-                0x000000000800227c                RCC_AHBPeriphClockCmd
-                0x00000000080022b4                RCC_APB2PeriphClockCmd
-                0x00000000080022ec                RCC_APB1PeriphClockCmd
-                0x0000000008002324                RCC_APB2PeriphResetCmd
-                0x000000000800235c                RCC_APB1PeriphResetCmd
-                0x0000000008002394                RCC_BackupResetCmd
-                0x00000000080023b0                RCC_ClockSecuritySystemCmd
-                0x00000000080023cc                RCC_MCOConfig
-                0x00000000080023e8                RCC_GetFlagStatus
-                0x0000000008002460                RCC_ClearFlag
-                0x0000000008002474                RCC_GetITStatus
-                0x00000000080024ac                RCC_ClearITPendingBit
- .text          0x00000000080024c8      0x244 Build/system_stm32f10x.o
-                0x00000000080024c8                SystemInit
-                0x0000000008002530                SystemCoreClockUpdate
- .text          0x000000000800270c     0x1624 Build/task.o
-                0x0000000008002948                xTaskCreate
-                0x00000000080029dc                vTaskSuspendAll
-                0x0000000008002a28                xTaskIncrementTick
-                0x0000000008002b74                xTaskResumeAll
-                0x0000000008002d2c                vTaskStartScheduler
-                0x0000000008002d98                vTaskSwitchContext
-                0x0000000008002e20                vTaskSuspend
-                0x0000000008002f0c                vTaskDelete
-                0x00000000080030d0                vTaskDelay
-                0x0000000008003114                xTaskGetTickCount
-                0x0000000008003128                vTaskDelayUntil
-                0x00000000080031c8                uxTaskPriorityGet
-                0x00000000080031fc                vTaskPrioritySet
-                0x0000000008003330                vTaskPriorityInherit
-                0x0000000008003410                uxTaskPriorityGetFromISR
-                0x0000000008003460                xTaskRemoveFromEventList
-                0x0000000008003508                xTaskPriorityDisinherit
-                0x00000000080035d0                vTaskSetTimeOutState
-                0x00000000080035f4                vTaskMissedYield
-                0x0000000008003604                xTaskCheckForTimeOut
-                0x0000000008003688                vTaskPlaceOnEventList
-                0x00000000080036b4                pvTaskIncrementMutexHeldCount
-                0x00000000080036d4                xTaskGetCurrentTaskHandle
-                0x00000000080036e8                xTaskGetSchedulerState
-                0x000000000800371c                vTaskPlaceOnEventListRestricted
-                0x0000000008003754                xTaskGenericNotify
-                0x0000000008003870                ulTaskNotifyTake
-                0x0000000008003900                vTaskNotifyGiveFromISR
-                0x00000000080039e8                xTaskNotifyWait
-                0x0000000008003a9c                xTaskGenericNotifyFromISR
-                0x0000000008003bf4                xTaskGenericNotifyStateClear
-                0x0000000008003c40                vTaskPlaceOnUnorderedEventList
-                0x0000000008003c78                uxTaskResetEventItemValue
-                0x0000000008003ca0                xTaskRemoveFromUnorderedEventList
- .text          0x0000000008003d30       0xd0 Build/main.o
-                0x0000000008003d30                vTaskA
-                0x0000000008003d84                vTaskB
-                0x0000000008003da8                main
+                0x0000000008000710                . = ALIGN (0x4)
+                0x0000000008000710                _etext = .
+ .text          0x0000000008000710      0x42c Build/heap.o
+                0x0000000008000710                memset
+                0x00000000080007ca                memcpy
+                0x0000000008000836                prvHeadInit
+                0x0000000008000900                prvInsertBlockIntoFreeList
+                0x00000000080009a8                pvPortMalloc
+                0x0000000008000acc                vPortFree
+ .text          0x0000000008000b3c      0x136 Build/list.o
+                0x0000000008000b3c                uxListRemove
+                0x0000000008000b86                vListInsertEnd
+                0x0000000008000bc4                vListInsert
+                0x0000000008000c2c                vListInitialiseItem
+                0x0000000008000c3c                vListInitialise
+ *fill*         0x0000000008000c72        0x2 
+ .text          0x0000000008000c74      0x6fc Build/OLED.o
+                0x0000000008000c74                OLED_I2C_Init
+                0x0000000008000cd4                OLED_I2C_Start
+                0x0000000008000d10                OLED_I2C_Stop
+                0x0000000008000d40                OLED_I2C_SendByte
+                0x0000000008000dc8                OLED_WriteCommand
+                0x0000000008000df8                OLED_WriteData
+                0x0000000008000e28                OLED_SetCursor
+                0x0000000008000e76                OLED_Clear
+                0x0000000008000eca                OLED_ShowChar
+                0x0000000008000fa0                OLED_ShowString
+                0x0000000008000ffc                OLED_Pow
+                0x0000000008001024                OLED_ShowNum
+                0x00000000080010b4                OLED_ShowSignedNum
+                0x000000000800117c                OLED_ShowHexNum
+                0x000000000800122a                OLED_ShowBinNum
+                0x00000000080012aa                OLED_Init
+ .text          0x0000000008001370      0x1fc Build/port.o
+                0x0000000008001388                pxPortInitialiseStack
+                0x00000000080013d8                vPortEnterCritical
+                0x0000000008001404                vPortExitCritical
+                0x0000000008001430                vPortSetupTimerInterrupt
+                0x000000000800146a                xPortStartScheduler
+                0x00000000080014a4                SysTick_Handler
+                0x00000000080014e8                PendSV_Handler
+                0x0000000008001538                SVC_Handler
+ .text          0x000000000800156c      0x5b0 Build/stm32f10x_gpio.o
+                0x000000000800156c                GPIO_DeInit
+                0x0000000008001650                GPIO_AFIODeInit
+                0x0000000008001666                GPIO_Init
+                0x00000000080017d6                GPIO_StructInit
+                0x00000000080017f4                GPIO_ReadInputDataBit
+                0x000000000800182a                GPIO_ReadInputData
+                0x000000000800183a                GPIO_ReadOutputDataBit
+                0x0000000008001870                GPIO_ReadOutputData
+                0x0000000008001880                GPIO_SetBits
+                0x0000000008001898                GPIO_ResetBits
+                0x00000000080018b0                GPIO_WriteBit
+                0x00000000080018e0                GPIO_Write
+                0x00000000080018f8                GPIO_PinLockConfig
+                0x0000000008001938                GPIO_EventOutputConfig
+                0x0000000008001984                GPIO_EventOutputCmd
+                0x00000000080019a0                GPIO_PinRemapConfig
+                0x0000000008001a7c                GPIO_EXTILineConfig
+                0x0000000008001b08                GPIO_ETH_MediaInterfaceConfig
+ .text          0x0000000008001b1c      0x74c Build/stm32f10x_rcc.o
+                0x0000000008001b1c                RCC_DeInit
+                0x0000000008001b70                RCC_HSEConfig
+                0x0000000008001bc4                RCC_WaitForHSEStartUp
+                0x0000000008001c20                RCC_AdjustHSICalibrationValue
+                0x0000000008001c58                RCC_HSICmd
+                0x0000000008001c74                RCC_PLLConfig
+                0x0000000008001ca8                RCC_PLLCmd
+                0x0000000008001cc4                RCC_SYSCLKConfig
+                0x0000000008001cf4                RCC_GetSYSCLKSource
+                0x0000000008001d08                RCC_HCLKConfig
+                0x0000000008001d38                RCC_PCLK1Config
+                0x0000000008001d68                RCC_PCLK2Config
+                0x0000000008001d98                RCC_ITConfig
+                0x0000000008001de4                RCC_USBCLKConfig
+                0x0000000008001df8                RCC_ADCCLKConfig
+                0x0000000008001e28                RCC_LSEConfig
+                0x0000000008001e64                RCC_LSICmd
+                0x0000000008001e80                RCC_RTCCLKConfig
+                0x0000000008001e9c                RCC_RTCCLKCmd
+                0x0000000008001eb8                RCC_GetClocksFreq
+                0x000000000800201c                RCC_AHBPeriphClockCmd
+                0x0000000008002054                RCC_APB2PeriphClockCmd
+                0x000000000800208c                RCC_APB1PeriphClockCmd
+                0x00000000080020c4                RCC_APB2PeriphResetCmd
+                0x00000000080020fc                RCC_APB1PeriphResetCmd
+                0x0000000008002134                RCC_BackupResetCmd
+                0x0000000008002150                RCC_ClockSecuritySystemCmd
+                0x000000000800216c                RCC_MCOConfig
+                0x0000000008002188                RCC_GetFlagStatus
+                0x0000000008002200                RCC_ClearFlag
+                0x0000000008002214                RCC_GetITStatus
+                0x000000000800224c                RCC_ClearITPendingBit
+ .text          0x0000000008002268      0x244 Build/system_stm32f10x.o
+                0x0000000008002268                SystemInit
+                0x00000000080022d0                SystemCoreClockUpdate
+ .text          0x00000000080024ac     0x1624 Build/task.o
+                0x00000000080026e8                xTaskCreate
+                0x000000000800277c                vTaskSuspendAll
+                0x00000000080027c8                xTaskIncrementTick
+                0x0000000008002914                xTaskResumeAll
+                0x0000000008002acc                vTaskStartScheduler
+                0x0000000008002b38                vTaskSwitchContext
+                0x0000000008002bc0                vTaskSuspend
+                0x0000000008002cac                vTaskDelete
+                0x0000000008002e70                vTaskDelay
+                0x0000000008002eb4                xTaskGetTickCount
+                0x0000000008002ec8                vTaskDelayUntil
+                0x0000000008002f68                uxTaskPriorityGet
+                0x0000000008002f9c                vTaskPrioritySet
+                0x00000000080030d0                vTaskPriorityInherit
+                0x00000000080031b0                uxTaskPriorityGetFromISR
+                0x0000000008003200                xTaskRemoveFromEventList
+                0x00000000080032a8                xTaskPriorityDisinherit
+                0x0000000008003370                vTaskSetTimeOutState
+                0x0000000008003394                vTaskMissedYield
+                0x00000000080033a4                xTaskCheckForTimeOut
+                0x0000000008003428                vTaskPlaceOnEventList
+                0x0000000008003454                pvTaskIncrementMutexHeldCount
+                0x0000000008003474                xTaskGetCurrentTaskHandle
+                0x0000000008003488                xTaskGetSchedulerState
+                0x00000000080034bc                vTaskPlaceOnEventListRestricted
+                0x00000000080034f4                xTaskGenericNotify
+                0x0000000008003610                ulTaskNotifyTake
+                0x00000000080036a0                vTaskNotifyGiveFromISR
+                0x0000000008003788                xTaskNotifyWait
+                0x000000000800383c                xTaskGenericNotifyFromISR
+                0x0000000008003994                xTaskGenericNotifyStateClear
+                0x00000000080039e0                vTaskPlaceOnUnorderedEventList
+                0x0000000008003a18                uxTaskResetEventItemValue
+                0x0000000008003a40                xTaskRemoveFromUnorderedEventList
+ .text          0x0000000008003ad0      0x160 Build/main.o
+                0x0000000008003ad0                uart1_init
+                0x0000000008003b60                uart1_send_char
+                0x0000000008003b8c                uart1_recv_char
+                0x0000000008003bac                HardFault_Handler
+                0x0000000008003bbc                main
 
-.glue_7         0x0000000008003e00        0x0
- .glue_7        0x0000000008003e00        0x0 linker stubs
+.glue_7         0x0000000008003c30        0x0
+ .glue_7        0x0000000008003c30        0x0 linker stubs
 
-.glue_7t        0x0000000008003e00        0x0
- .glue_7t       0x0000000008003e00        0x0 linker stubs
+.glue_7t        0x0000000008003c30        0x0
+ .glue_7t       0x0000000008003c30        0x0 linker stubs
 
-.vfp11_veneer   0x0000000008003e00        0x0
- .vfp11_veneer  0x0000000008003e00        0x0 linker stubs
+.vfp11_veneer   0x0000000008003c30        0x0
+ .vfp11_veneer  0x0000000008003c30        0x0 linker stubs
 
-.v4_bx          0x0000000008003e00        0x0
- .v4_bx         0x0000000008003e00        0x0 linker stubs
+.v4_bx          0x0000000008003c30        0x0
+ .v4_bx         0x0000000008003c30        0x0 linker stubs
 
-.iplt           0x0000000008003e00        0x0
- .iplt          0x0000000008003e00        0x0 Build/event_groups.o
+.iplt           0x0000000008003c30        0x0
+ .iplt          0x0000000008003c30        0x0 Build/heap.o
 
 .text.Reset_Handler
-                0x0000000008003e00       0x44
+                0x0000000008003c30       0x44
  .text.Reset_Handler
-                0x0000000008003e00       0x44 Build/startup_stm32f10x_md.o
-                0x0000000008003e00                Reset_Handler
+                0x0000000008003c30       0x44 Build/startup_stm32f10x_md.o
+                0x0000000008003c30                Reset_Handler
 
 .text.Default_Handler
-                0x0000000008003e44        0x2
+                0x0000000008003c74        0x2
  .text.Default_Handler
-                0x0000000008003e44        0x2 Build/startup_stm32f10x_md.o
-                0x0000000008003e44                EXTI2_IRQHandler
-                0x0000000008003e44                DebugMon_Handler
-                0x0000000008003e44                TIM1_CC_IRQHandler
-                0x0000000008003e44                HardFault_Handler
-                0x0000000008003e44                PVD_IRQHandler
-                0x0000000008003e44                NMI_Handler
-                0x0000000008003e44                EXTI3_IRQHandler
-                0x0000000008003e44                EXTI0_IRQHandler
-                0x0000000008003e44                I2C2_EV_IRQHandler
-                0x0000000008003e44                UsageFault_Handler
-                0x0000000008003e44                ADC1_2_IRQHandler
-                0x0000000008003e44                SPI1_IRQHandler
-                0x0000000008003e44                TAMPER_IRQHandler
-                0x0000000008003e44                DMA1_Channel4_IRQHandler
-                0x0000000008003e44                USART3_IRQHandler
-                0x0000000008003e44                RTC_IRQHandler
-                0x0000000008003e44                DMA1_Channel7_IRQHandler
-                0x0000000008003e44                CAN1_RX1_IRQHandler
-                0x0000000008003e44                TIM4_IRQHandler
-                0x0000000008003e44                I2C1_EV_IRQHandler
-                0x0000000008003e44                DMA1_Channel6_IRQHandler
-                0x0000000008003e44                TIM3_IRQHandler
-                0x0000000008003e44                RCC_IRQHandler
-                0x0000000008003e44                TIM1_TRG_COM_IRQHandler
-                0x0000000008003e44                DMA1_Channel1_IRQHandler
-                0x0000000008003e44                Default_Handler
-                0x0000000008003e44                EXTI15_10_IRQHandler
-                0x0000000008003e44                EXTI9_5_IRQHandler
-                0x0000000008003e44                SPI2_IRQHandler
-                0x0000000008003e44                MemManage_Handler
-                0x0000000008003e44                DMA1_Channel5_IRQHandler
-                0x0000000008003e44                EXTI4_IRQHandler
-                0x0000000008003e44                USB_LP_CAN1_RX0_IRQHandler
-                0x0000000008003e44                USB_HP_CAN1_TX_IRQHandler
-                0x0000000008003e44                DMA1_Channel3_IRQHandler
-                0x0000000008003e44                TIM1_UP_IRQHandler
-                0x0000000008003e44                WWDG_IRQHandler
-                0x0000000008003e44                TIM2_IRQHandler
-                0x0000000008003e44                TIM1_BRK_IRQHandler
-                0x0000000008003e44                EXTI1_IRQHandler
-                0x0000000008003e44                RTCAlarm_IRQHandler
-                0x0000000008003e44                USART2_IRQHandler
-                0x0000000008003e44                I2C2_ER_IRQHandler
-                0x0000000008003e44                DMA1_Channel2_IRQHandler
-                0x0000000008003e44                CAN1_SCE_IRQHandler
-                0x0000000008003e44                FLASH_IRQHandler
-                0x0000000008003e44                BusFault_Handler
-                0x0000000008003e44                USART1_IRQHandler
-                0x0000000008003e44                I2C1_ER_IRQHandler
-                0x0000000008003e44                USBWakeUp_IRQHandler
+                0x0000000008003c74        0x2 Build/startup_stm32f10x_md.o
+                0x0000000008003c74                EXTI2_IRQHandler
+                0x0000000008003c74                DebugMon_Handler
+                0x0000000008003c74                TIM1_CC_IRQHandler
+                0x0000000008003c74                PVD_IRQHandler
+                0x0000000008003c74                NMI_Handler
+                0x0000000008003c74                EXTI3_IRQHandler
+                0x0000000008003c74                EXTI0_IRQHandler
+                0x0000000008003c74                I2C2_EV_IRQHandler
+                0x0000000008003c74                UsageFault_Handler
+                0x0000000008003c74                ADC1_2_IRQHandler
+                0x0000000008003c74                SPI1_IRQHandler
+                0x0000000008003c74                TAMPER_IRQHandler
+                0x0000000008003c74                DMA1_Channel4_IRQHandler
+                0x0000000008003c74                USART3_IRQHandler
+                0x0000000008003c74                RTC_IRQHandler
+                0x0000000008003c74                DMA1_Channel7_IRQHandler
+                0x0000000008003c74                CAN1_RX1_IRQHandler
+                0x0000000008003c74                TIM4_IRQHandler
+                0x0000000008003c74                I2C1_EV_IRQHandler
+                0x0000000008003c74                DMA1_Channel6_IRQHandler
+                0x0000000008003c74                TIM3_IRQHandler
+                0x0000000008003c74                RCC_IRQHandler
+                0x0000000008003c74                TIM1_TRG_COM_IRQHandler
+                0x0000000008003c74                DMA1_Channel1_IRQHandler
+                0x0000000008003c74                Default_Handler
+                0x0000000008003c74                EXTI15_10_IRQHandler
+                0x0000000008003c74                EXTI9_5_IRQHandler
+                0x0000000008003c74                SPI2_IRQHandler
+                0x0000000008003c74                MemManage_Handler
+                0x0000000008003c74                DMA1_Channel5_IRQHandler
+                0x0000000008003c74                EXTI4_IRQHandler
+                0x0000000008003c74                USB_LP_CAN1_RX0_IRQHandler
+                0x0000000008003c74                USB_HP_CAN1_TX_IRQHandler
+                0x0000000008003c74                DMA1_Channel3_IRQHandler
+                0x0000000008003c74                TIM1_UP_IRQHandler
+                0x0000000008003c74                WWDG_IRQHandler
+                0x0000000008003c74                TIM2_IRQHandler
+                0x0000000008003c74                TIM1_BRK_IRQHandler
+                0x0000000008003c74                EXTI1_IRQHandler
+                0x0000000008003c74                RTCAlarm_IRQHandler
+                0x0000000008003c74                USART2_IRQHandler
+                0x0000000008003c74                I2C2_ER_IRQHandler
+                0x0000000008003c74                DMA1_Channel2_IRQHandler
+                0x0000000008003c74                CAN1_SCE_IRQHandler
+                0x0000000008003c74                FLASH_IRQHandler
+                0x0000000008003c74                BusFault_Handler
+                0x0000000008003c74                USART1_IRQHandler
+                0x0000000008003c74                I2C1_ER_IRQHandler
+                0x0000000008003c74                USBWakeUp_IRQHandler
 
-.rel.dyn        0x0000000008003e48        0x0
- .rel.iplt      0x0000000008003e48        0x0 Build/event_groups.o
+.rel.dyn        0x0000000008003c78        0x0
+ .rel.iplt      0x0000000008003c78        0x0 Build/heap.o
 
 .ARM.extab
  *(.ARM.extab*)
 
 .ARM.exidx
  *(.ARM.exidx*)
-                0x0000000008003e46                _sidata = .
+                0x0000000008003c76                _sidata = .
 
-.data           0x0000000020000000       0x30 load address 0x0000000008003e46
+.data           0x0000000020000000       0x30 load address 0x0000000008003c76
                 0x0000000020000000                . = ALIGN (0x4)
                 0x0000000020000000                _sdata = .
  *(.data*)
@@ -374,128 +382,119 @@ LOAD Build/startup_stm32f10x_md.o
                 0x0000000020000030                . = ALIGN (0x4)
                 0x0000000020000030                _edata = .
 
-.igot.plt       0x0000000020000030        0x0 load address 0x0000000008003e78
- .igot.plt      0x0000000020000030        0x0 Build/event_groups.o
+.igot.plt       0x0000000020000030        0x0 load address 0x0000000008003ca8
+ .igot.plt      0x0000000020000030        0x0 Build/heap.o
 
-.bss            0x0000000020000030     0x2920 load address 0x0000000008003e78
+.bss            0x0000000020000030     0x291c load address 0x0000000008003ca8
                 0x0000000020000030                . = ALIGN (0x4)
                 0x0000000020000030                _sbss = .
  *(.bss*)
  .bss           0x0000000020000030     0x2818 Build/heap.o
  .bss           0x0000000020002848      0x104 Build/task.o
                 0x0000000020002944                pxCurrentTCB
- .bss           0x000000002000294c        0x4 Build/main.o
  *(COMMON)
-                0x0000000020002950                . = ALIGN (0x4)
-                0x0000000020002950                _ebss = .
+                0x000000002000294c                . = ALIGN (0x4)
+                0x000000002000294c                _ebss = .
 
-._heap          0x0000000020002950        0x0
-                0x0000000020002950                . = ALIGN (0x4)
-                0x0000000020002950                . = (. + _heap_size)
-                0x0000000020002950                . = ALIGN (0x4)
+._heap          0x000000002000294c        0x0
+                0x000000002000294c                . = ALIGN (0x4)
+                0x000000002000294c                . = (. + _heap_size)
+                0x000000002000294c                . = ALIGN (0x4)
 
-._stack         0x0000000020002950        0x0
-                0x0000000020002950                . = ALIGN (0x4)
-                0x0000000020002950                . = (. + _stack_size)
-                0x0000000020002950                . = ALIGN (0x4)
+._stack         0x000000002000294c        0x0
+                0x000000002000294c                . = ALIGN (0x4)
+                0x000000002000294c                . = (. + _stack_size)
+                0x000000002000294c                . = ALIGN (0x4)
                 0x000000000000010c                __isr_vector_size__ = SIZEOF (.isr_vector)
-                0x00000000000036e0                __text_size__ = SIZEOF (.text)
+                0x0000000000003520                __text_size__ = SIZEOF (.text)
                 0x0000000000000030                __data_size__ = SIZEOF (.data)
-                0x0000000000002920                __bss_size__ = SIZEOF (.bss)
+                0x000000000000291c                __bss_size__ = SIZEOF (.bss)
 OUTPUT(Build/exec.elf elf32-littlearm)
 LOAD linker stubs
 
-.debug_info     0x0000000000000000     0x3b4b
- .debug_info    0x0000000000000000      0x405 Build/event_groups.o
- .debug_info    0x0000000000000405      0x356 Build/heap.o
- .debug_info    0x000000000000075b      0x25d Build/list.o
- .debug_info    0x00000000000009b8      0x637 Build/OLED.o
- .debug_info    0x0000000000000fef      0x265 Build/port.o
- .debug_info    0x0000000000001254      0x70a Build/stm32f10x_gpio.o
- .debug_info    0x000000000000195e      0x8cf Build/stm32f10x_rcc.o
- .debug_info    0x000000000000222d      0x451 Build/system_stm32f10x.o
- .debug_info    0x000000000000267e     0x137a Build/task.o
- .debug_info    0x00000000000039f8      0x131 Build/main.o
- .debug_info    0x0000000000003b29       0x22 Build/startup_stm32f10x_md.o
+.debug_info     0x0000000000000000     0x3964
+ .debug_info    0x0000000000000000      0x356 Build/heap.o
+ .debug_info    0x0000000000000356      0x25d Build/list.o
+ .debug_info    0x00000000000005b3      0x637 Build/OLED.o
+ .debug_info    0x0000000000000bea      0x265 Build/port.o
+ .debug_info    0x0000000000000e4f      0x70a Build/stm32f10x_gpio.o
+ .debug_info    0x0000000000001559      0x8cf Build/stm32f10x_rcc.o
+ .debug_info    0x0000000000001e28      0x451 Build/system_stm32f10x.o
+ .debug_info    0x0000000000002279     0x137a Build/task.o
+ .debug_info    0x00000000000035f3      0x34f Build/main.o
+ .debug_info    0x0000000000003942       0x22 Build/startup_stm32f10x_md.o
 
-.debug_abbrev   0x0000000000000000     0x102a
- .debug_abbrev  0x0000000000000000       0xf3 Build/event_groups.o
- .debug_abbrev  0x00000000000000f3      0x166 Build/heap.o
- .debug_abbrev  0x0000000000000259       0xc1 Build/list.o
- .debug_abbrev  0x000000000000031a      0x1f4 Build/OLED.o
- .debug_abbrev  0x000000000000050e      0x1b8 Build/port.o
- .debug_abbrev  0x00000000000006c6      0x1e9 Build/stm32f10x_gpio.o
- .debug_abbrev  0x00000000000008af      0x1d3 Build/stm32f10x_rcc.o
- .debug_abbrev  0x0000000000000a82      0x1ae Build/system_stm32f10x.o
- .debug_abbrev  0x0000000000000c30      0x323 Build/task.o
- .debug_abbrev  0x0000000000000f53       0xc5 Build/main.o
- .debug_abbrev  0x0000000000001018       0x12 Build/startup_stm32f10x_md.o
+.debug_abbrev   0x0000000000000000      0xfb9
+ .debug_abbrev  0x0000000000000000      0x166 Build/heap.o
+ .debug_abbrev  0x0000000000000166       0xc1 Build/list.o
+ .debug_abbrev  0x0000000000000227      0x1f4 Build/OLED.o
+ .debug_abbrev  0x000000000000041b      0x1b8 Build/port.o
+ .debug_abbrev  0x00000000000005d3      0x1e9 Build/stm32f10x_gpio.o
+ .debug_abbrev  0x00000000000007bc      0x1d3 Build/stm32f10x_rcc.o
+ .debug_abbrev  0x000000000000098f      0x1ae Build/system_stm32f10x.o
+ .debug_abbrev  0x0000000000000b3d      0x323 Build/task.o
+ .debug_abbrev  0x0000000000000e60      0x147 Build/main.o
+ .debug_abbrev  0x0000000000000fa7       0x12 Build/startup_stm32f10x_md.o
 
-.debug_aranges  0x0000000000000000      0x168
+.debug_aranges  0x0000000000000000      0x148
  .debug_aranges
-                0x0000000000000000       0x20 Build/event_groups.o
+                0x0000000000000000       0x20 Build/heap.o
  .debug_aranges
-                0x0000000000000020       0x20 Build/heap.o
+                0x0000000000000020       0x20 Build/list.o
  .debug_aranges
-                0x0000000000000040       0x20 Build/list.o
+                0x0000000000000040       0x20 Build/OLED.o
  .debug_aranges
-                0x0000000000000060       0x20 Build/OLED.o
+                0x0000000000000060       0x20 Build/port.o
  .debug_aranges
-                0x0000000000000080       0x20 Build/port.o
+                0x0000000000000080       0x20 Build/stm32f10x_gpio.o
  .debug_aranges
-                0x00000000000000a0       0x20 Build/stm32f10x_gpio.o
+                0x00000000000000a0       0x20 Build/stm32f10x_rcc.o
  .debug_aranges
-                0x00000000000000c0       0x20 Build/stm32f10x_rcc.o
+                0x00000000000000c0       0x20 Build/system_stm32f10x.o
  .debug_aranges
-                0x00000000000000e0       0x20 Build/system_stm32f10x.o
+                0x00000000000000e0       0x20 Build/task.o
  .debug_aranges
-                0x0000000000000100       0x20 Build/task.o
+                0x0000000000000100       0x20 Build/main.o
  .debug_aranges
-                0x0000000000000120       0x20 Build/main.o
- .debug_aranges
-                0x0000000000000140       0x28 Build/startup_stm32f10x_md.o
+                0x0000000000000120       0x28 Build/startup_stm32f10x_md.o
 
-.debug_line     0x0000000000000000     0x1f3f
- .debug_line    0x0000000000000000      0x1a2 Build/event_groups.o
- .debug_line    0x00000000000001a2      0x2ca Build/heap.o
- .debug_line    0x000000000000046c      0x10d Build/list.o
- .debug_line    0x0000000000000579      0x381 Build/OLED.o
- .debug_line    0x00000000000008fa      0x12c Build/port.o
- .debug_line    0x0000000000000a26      0x37e Build/stm32f10x_gpio.o
- .debug_line    0x0000000000000da4      0x44b Build/stm32f10x_rcc.o
- .debug_line    0x00000000000011ef      0x207 Build/system_stm32f10x.o
- .debug_line    0x00000000000013f6      0xa1b Build/task.o
- .debug_line    0x0000000000001e11       0xb7 Build/main.o
- .debug_line    0x0000000000001ec8       0x77 Build/startup_stm32f10x_md.o
+.debug_line     0x0000000000000000     0x1e04
+ .debug_line    0x0000000000000000      0x2ca Build/heap.o
+ .debug_line    0x00000000000002ca      0x10d Build/list.o
+ .debug_line    0x00000000000003d7      0x381 Build/OLED.o
+ .debug_line    0x0000000000000758      0x12c Build/port.o
+ .debug_line    0x0000000000000884      0x37e Build/stm32f10x_gpio.o
+ .debug_line    0x0000000000000c02      0x44b Build/stm32f10x_rcc.o
+ .debug_line    0x000000000000104d      0x207 Build/system_stm32f10x.o
+ .debug_line    0x0000000000001254      0xa1b Build/task.o
+ .debug_line    0x0000000000001c6f      0x11e Build/main.o
+ .debug_line    0x0000000000001d8d       0x77 Build/startup_stm32f10x_md.o
 
-.debug_str      0x0000000000000000     0x1adb
- .debug_str     0x0000000000000000      0x34d Build/event_groups.o
-                                        0x3a9 (size before relaxing)
- .debug_str     0x000000000000034d      0x1b3 Build/heap.o
+.debug_str      0x0000000000000000     0x19aa
+ .debug_str     0x0000000000000000      0x265 Build/heap.o
                                         0x272 (size before relaxing)
- .debug_str     0x0000000000000500       0x8d Build/list.o
+ .debug_str     0x0000000000000265      0x135 Build/list.o
                                         0x1fc (size before relaxing)
- .debug_str     0x000000000000058d      0x2a3 Build/OLED.o
+ .debug_str     0x000000000000039a      0x2e5 Build/OLED.o
                                         0x3fd (size before relaxing)
- .debug_str     0x0000000000000830      0x15b Build/port.o
+ .debug_str     0x000000000000067f      0x15b Build/port.o
                                         0x22e (size before relaxing)
- .debug_str     0x000000000000098b      0x24a Build/stm32f10x_gpio.o
+ .debug_str     0x00000000000007da      0x24a Build/stm32f10x_gpio.o
                                         0x4d4 (size before relaxing)
- .debug_str     0x0000000000000bd5      0x425 Build/stm32f10x_rcc.o
+ .debug_str     0x0000000000000a24      0x425 Build/stm32f10x_rcc.o
                                         0x5d5 (size before relaxing)
- .debug_str     0x0000000000000ffa       0xd6 Build/system_stm32f10x.o
+ .debug_str     0x0000000000000e49       0xd6 Build/system_stm32f10x.o
                                         0x29b (size before relaxing)
- .debug_str     0x00000000000010d0      0x9ab Build/task.o
+ .debug_str     0x0000000000000f1f      0x9c4 Build/task.o
                                         0xc64 (size before relaxing)
- .debug_str     0x0000000000001a7b       0x36 Build/main.o
-                                        0x1a5 (size before relaxing)
- .debug_str     0x0000000000001ab1       0x2a Build/startup_stm32f10x_md.o
+ .debug_str     0x00000000000018e3       0x9d Build/main.o
+                                        0x23c (size before relaxing)
+ .debug_str     0x0000000000001980       0x2a Build/startup_stm32f10x_md.o
                                          0x4d (size before relaxing)
 
 .comment        0x0000000000000000       0x33
- .comment       0x0000000000000000       0x33 Build/event_groups.o
+ .comment       0x0000000000000000       0x33 Build/heap.o
                                          0x34 (size before relaxing)
- .comment       0x0000000000000033       0x34 Build/heap.o
  .comment       0x0000000000000033       0x34 Build/list.o
  .comment       0x0000000000000033       0x34 Build/OLED.o
  .comment       0x0000000000000033       0x34 Build/port.o
@@ -508,39 +507,36 @@ LOAD linker stubs
 .ARM.attributes
                 0x0000000000000000       0x2b
  .ARM.attributes
-                0x0000000000000000       0x2d Build/event_groups.o
+                0x0000000000000000       0x2d Build/heap.o
  .ARM.attributes
-                0x000000000000002d       0x2d Build/heap.o
+                0x000000000000002d       0x2d Build/list.o
  .ARM.attributes
-                0x000000000000005a       0x2d Build/list.o
+                0x000000000000005a       0x2d Build/OLED.o
  .ARM.attributes
-                0x0000000000000087       0x2d Build/OLED.o
+                0x0000000000000087       0x2d Build/port.o
  .ARM.attributes
-                0x00000000000000b4       0x2d Build/port.o
+                0x00000000000000b4       0x2d Build/stm32f10x_gpio.o
  .ARM.attributes
-                0x00000000000000e1       0x2d Build/stm32f10x_gpio.o
+                0x00000000000000e1       0x2d Build/stm32f10x_rcc.o
  .ARM.attributes
-                0x000000000000010e       0x2d Build/stm32f10x_rcc.o
+                0x000000000000010e       0x2d Build/system_stm32f10x.o
  .ARM.attributes
-                0x000000000000013b       0x2d Build/system_stm32f10x.o
+                0x000000000000013b       0x2d Build/task.o
  .ARM.attributes
-                0x0000000000000168       0x2d Build/task.o
+                0x0000000000000168       0x2d Build/main.o
  .ARM.attributes
-                0x0000000000000195       0x2d Build/main.o
- .ARM.attributes
-                0x00000000000001c2       0x21 Build/startup_stm32f10x_md.o
+                0x0000000000000195       0x21 Build/startup_stm32f10x_md.o
 
-.debug_frame    0x0000000000000000      0xe48
- .debug_frame   0x0000000000000000       0x7c Build/event_groups.o
- .debug_frame   0x000000000000007c       0xac Build/heap.o
- .debug_frame   0x0000000000000128       0x88 Build/list.o
- .debug_frame   0x00000000000001b0      0x1d0 Build/OLED.o
- .debug_frame   0x0000000000000380       0xe0 Build/port.o
- .debug_frame   0x0000000000000460      0x1c4 Build/stm32f10x_gpio.o
- .debug_frame   0x0000000000000624      0x2fc Build/stm32f10x_rcc.o
- .debug_frame   0x0000000000000920       0x70 Build/system_stm32f10x.o
- .debug_frame   0x0000000000000990      0x460 Build/task.o
- .debug_frame   0x0000000000000df0       0x58 Build/main.o
+.debug_frame    0x0000000000000000      0xdec
+ .debug_frame   0x0000000000000000       0xac Build/heap.o
+ .debug_frame   0x00000000000000ac       0x88 Build/list.o
+ .debug_frame   0x0000000000000134      0x1d0 Build/OLED.o
+ .debug_frame   0x0000000000000304       0xe0 Build/port.o
+ .debug_frame   0x00000000000003e4      0x1c4 Build/stm32f10x_gpio.o
+ .debug_frame   0x00000000000005a8      0x2fc Build/stm32f10x_rcc.o
+ .debug_frame   0x00000000000008a4       0x70 Build/system_stm32f10x.o
+ .debug_frame   0x0000000000000914      0x460 Build/task.o
+ .debug_frame   0x0000000000000d74       0x78 Build/main.o
 
 .debug_ranges   0x0000000000000000       0x20
  .debug_ranges  0x0000000000000000       0x20 Build/startup_stm32f10x_md.o
@@ -590,7 +586,7 @@ GPIO_StructInit                                   Build/stm32f10x_gpio.o
 GPIO_Write                                        Build/stm32f10x_gpio.o
 GPIO_WriteBit                                     Build/stm32f10x_gpio.o
                                                   Build/OLED.o
-HardFault_Handler                                 Build/startup_stm32f10x_md.o
+HardFault_Handler                                 Build/main.o
 I2C1_ER_IRQHandler                                Build/startup_stm32f10x_md.o
 I2C1_EV_IRQHandler                                Build/startup_stm32f10x_md.o
 I2C2_ER_IRQHandler                                Build/startup_stm32f10x_md.o
@@ -618,6 +614,7 @@ OLED_ShowHexNum                                   Build/OLED.o
 OLED_ShowNum                                      Build/OLED.o
 OLED_ShowSignedNum                                Build/OLED.o
 OLED_ShowString                                   Build/OLED.o
+                                                  Build/main.o
 OLED_WriteCommand                                 Build/OLED.o
 OLED_WriteData                                    Build/OLED.o
 PVD_IRQHandler                                    Build/startup_stm32f10x_md.o
@@ -736,6 +733,9 @@ pxCurrentTCB                                      Build/task.o
                                                   Build/port.o
 pxPortInitialiseStack                             Build/port.o
                                                   Build/task.o
+uart1_init                                        Build/main.o
+uart1_recv_char                                   Build/main.o
+uart1_send_char                                   Build/main.o
 ulTaskNotifyTake                                  Build/task.o
 uxListRemove                                      Build/list.o
                                                   Build/timers.o
@@ -779,10 +779,7 @@ vQueueDelete                                      Build/queue.o
 vQueueWaitForMessageRestricted                    Build/queue.o
                                                   Build/timers.o
 vStreamBufferDelete                               Build/stream_buffer.o
-vTaskA                                            Build/main.o
-vTaskB                                            Build/main.o
 vTaskDelay                                        Build/task.o
-                                                  Build/main.o
 vTaskDelayUntil                                   Build/task.o
 vTaskDelete                                       Build/task.o
 vTaskMissedYield                                  Build/task.o
@@ -801,7 +798,6 @@ vTaskSetTimeOutState                              Build/task.o
                                                   Build/stream_buffer.o
                                                   Build/queue.o
 vTaskStartScheduler                               Build/task.o
-                                                  Build/main.o
 vTaskSuspend                                      Build/task.o
 vTaskSuspendAll                                   Build/task.o
                                                   Build/timers.o
@@ -812,11 +808,8 @@ vTaskSuspendAll                                   Build/task.o
 vTaskSwitchContext                                Build/task.o
                                                   Build/port.o
 xEventGroupCreate                                 Build/event_groups.o
-                                                  Build/main.o
 xEventGroupSetBits                                Build/event_groups.o
-                                                  Build/main.o
 xEventGroupWaitBits                               Build/event_groups.o
-                                                  Build/main.o
 xPortStartScheduler                               Build/port.o
                                                   Build/task.o
 xQueueCreateCountingSemaphore                     Build/queue.o
@@ -843,7 +836,6 @@ xTaskCheckForTimeOut                              Build/task.o
                                                   Build/stream_buffer.o
                                                   Build/queue.o
 xTaskCreate                                       Build/task.o
-                                                  Build/main.o
                                                   Build/timers.o
 xTaskGenericNotify                                Build/task.o
                                                   Build/stream_buffer.o
