@@ -15,7 +15,7 @@ void uart1_init(void)
 
     USART1->CR1 |=(1<<13);
     USART1->CR1 |=(1<<3);
-    USART1->CR1 |= (1 << 2); 
+    USART1->CR1 |= (1 << 2);    
 }
 void uart1_send_char(char c)
 {
